@@ -37,8 +37,14 @@ Ou use o Makefile: `make dev-infra`, `make backend`, `make frontend`.
 
 ## Status
 
-🚧 **Fase 0/1 do roadmap** — fundações e mundo andável. Veja o
+🚧 **Fase 1 do roadmap — mundo andável (funcional).** Já é possível entrar no lobby
+com um nome, andar com WASD/setas entre outros jogadores em tempo real, com colisão
+validada no servidor (autoritativo, tick 20 Hz), predição no cliente e lista de
+presença. Próximo marco: Fase 2 (vídeo/áudio por proximidade). Veja o
 [roadmap na especificação](./ESPECIFICACAO.md#10-roadmap-de-implementação).
+
+Os assets placeholder (tileset, avatar, mapa lobby) são gerados por código:
+`cd backend && go run ./cmd/genassets` (já commitados; CC0).
 
 ## Licença
 

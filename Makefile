@@ -1,4 +1,4 @@
-.PHONY: dev-infra backend frontend test lint proto
+.PHONY: dev-infra backend frontend test lint proto genassets
 
 # Sobe Postgres e Redis para desenvolvimento
 dev-infra:
@@ -19,6 +19,10 @@ test:
 lint:
 	cd backend && go vet ./...
 	cd frontend && npm run typecheck
+
+# Regenera os assets placeholder (tileset, avatar, mapa lobby)
+genassets:
+	cd backend && go run ./cmd/genassets
 
 # Gera código Go e TS a partir de proto/ (requer buf: https://buf.build)
 proto:

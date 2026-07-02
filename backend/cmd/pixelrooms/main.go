@@ -12,6 +12,7 @@ import (
 
 	"pixelrooms/backend/internal/api"
 	"pixelrooms/backend/internal/config"
+	"pixelrooms/backend/internal/game"
 )
 
 func main() {
@@ -23,9 +24,11 @@ func main() {
 	}
 	slog.SetDefault(slog.New(handler))
 
+	rooms := game.NewManager(cfg.AssetsDir)
+
 	srv := &http.Server{
 		Addr:              cfg.Addr,
-		Handler:           api.NewRouter(),
+		Handler:           api.NewRouter(api.Deps{AssetsDir: cfg.AssetsDir, Rooms: rooms}),
 		ReadHeaderTimeout: 10 * time.Second,
 	}
 

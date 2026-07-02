@@ -12,6 +12,7 @@ const (
 type Config struct {
 	Addr        string // endereço HTTP, ex.: ":8080"
 	Env         string // development | production
+	AssetsDir   string // raiz dos assets embutidos (tilesets, avatares, mapas)
 	DatabaseURL string
 	RedisURL    string
 	JWTSecret   string
@@ -26,6 +27,7 @@ func Load() Config {
 	return Config{
 		Addr:        getenv("PIXELROOMS_ADDR", ":8080"),
 		Env:         getenv("PIXELROOMS_ENV", EnvDevelopment),
+		AssetsDir:   getenv("PIXELROOMS_ASSETS_DIR", "../assets"),
 		DatabaseURL: getenv("PIXELROOMS_DATABASE_URL", "postgres://pixelrooms:pixelrooms@localhost:5432/pixelrooms?sslmode=disable"),
 		RedisURL:    getenv("PIXELROOMS_REDIS_URL", "redis://localhost:6379/0"),
 		JWTSecret:   getenv("PIXELROOMS_JWT_SECRET", "dev-secret-nao-usar-em-producao"),

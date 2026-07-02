@@ -9,6 +9,7 @@ export default defineConfig({
     proxy: {
       // Backend Go em dev (make backend)
       "/api": "http://localhost:8080",
+      "/assets": "http://localhost:8080",
       "/ws": {
         target: "ws://localhost:8080",
         ws: true,

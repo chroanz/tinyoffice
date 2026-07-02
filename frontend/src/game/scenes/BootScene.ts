@@ -1,31 +1,43 @@
 import Phaser from "phaser";
-
-export const TILE_SIZE = 32; // px — unidade básica do mundo (ESPECIFICACAO.md §5.1)
+import { TILE_SIZE } from "../constants";
+import { client } from "../../net/client";
+import type { JoinAck } from "../../net/messages";
 
 /**
- * Cena provisória da Fase 0: desenha o grid de tiles 32×32 para validar
- * renderização pixelada. Será substituída pelas cenas de mundo (tilemap
- * Tiled + avatares) na Fase 1.
+ * Carrega os assets do mundo e espera o join_ack do servidor (o usuário
+ * entra pelo overlay React); com os dois prontos, inicia a WorldScene.
  */
 export class BootScene extends Phaser.Scene {
   constructor() {
     super("boot");
   }
 
+  preload() {
+    this.load.tilemapTiledJSON("lobby", "/assets/maps/templates/lobby.tmj");
+    this.load.image("tiles", "/assets/tilesets/basic.png");
+    this.load.spritesheet("avatar", "/assets/avatars/body/placeholder.png", {
+      frameWidth: 32,
+      frameHeight: 64,
+    });
+  }
+
   create() {
     this.drawTileGrid();
-
-    const { width, height } = this.scale;
-    this.add
-      .text(width / 2, height / 2, "PixelRooms\nmundo em construção — Fase 1", {
-        fontFamily: "monospace",
-        fontSize: "24px",
-        color: "#c0caf5",
-        align: "center",
-      })
-      .setOrigin(0.5);
-
     this.scale.on(Phaser.Scale.Events.RESIZE, () => this.drawTileGrid());
+
+    if (client.lastAck) {
+      this.enterWorld(client.lastAck);
+      return;
+    }
+    const off = client.on("joined", (ack) => {
+      off();
+      this.enterWorld(ack);
+    });
+    this.events.once(Phaser.Scenes.Events.SHUTDOWN, off);
+  }
+
+  private enterWorld(ack: JoinAck) {
+    this.scene.start("world", { ack });
   }
 
   private grid?: Phaser.GameObjects.Graphics;

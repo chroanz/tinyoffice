@@ -1,0 +1,28 @@
+# Go
+backend/bin/
+backend/pixelrooms
+*.test
+*.out
+
+# Node / frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Protobuf gerado (regenerado no build/CI)
+backend/internal/pb/
+frontend/src/net/pb/
+
+# Ambiente e segredos
+.env
+.env.*
+!.env.example
+
+# Dados locais de containers
+.data/
+
+# Editores / SO
+.idea/
+.vscode/
+*.swp
+.DS_Store

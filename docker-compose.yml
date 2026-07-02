@@ -1,0 +1,48 @@
+# Infra de desenvolvimento do PixelRooms.
+# Fase atual: apenas Postgres e Redis.
+# Fases futuras (ver ESPECIFICACAO.md §10): livekit (SFU), coturn (TURN),
+# caddy (TLS) e as imagens do backend/frontend para deploy de produção.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: pixelrooms
+      POSTGRES_PASSWORD: pixelrooms
+      POSTGRES_DB: pixelrooms
+    ports:
+      - "5432:5432"
+    volumes:
+      - ./.data/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U pixelrooms"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./.data/redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  # --- Fase 2 (MVP de mídia) ---
+  # livekit:
+  #   image: livekit/livekit-server:latest
+  #   command: --config /etc/livekit.yaml
+  #   ports:
+  #     - "7880:7880"   # API/WebSocket
+  #     - "7881:7881"   # TCP fallback
+  #     - "50000-50100:50000-50100/udp"
+  #   volumes:
+  #     - ./deploy/livekit.yaml:/etc/livekit.yaml
+  #
+  # coturn:
+  #   image: coturn/coturn:latest
+  #   network_mode: host

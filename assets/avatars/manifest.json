@@ -1,0 +1,6 @@
+{
+  "$schema": "../schemas/avatar-manifest.schema.json",
+  "frameSize": { "w": 32, "h": 64 },
+  "sheetLayout": "6 colunas × 5 linhas (idle×2, walk×4; linhas: down, up, left, right, sit)",
+  "items": []
+}

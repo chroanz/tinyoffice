@@ -1,0 +1,198 @@
+// Protocolo em tempo real do PixelRooms (WebSocket binário).
+// Fonte de verdade: ESPECIFICACAO.md §7.
+//
+// Geração de código (via buf, ver Makefile):
+//   Go → backend/internal/pb
+//   TS → frontend/src/net/pb
+
+syntax = "proto3";
+
+package pixelrooms.v1;
+
+option go_package = "pixelrooms/backend/internal/pb;pb";
+
+// ── Tipos básicos ────────────────────────────────────────────────
+
+enum Direction {
+  DIRECTION_UNSPECIFIED = 0;
+  DIRECTION_DOWN = 1;
+  DIRECTION_UP = 2;
+  DIRECTION_LEFT = 3;
+  DIRECTION_RIGHT = 4;
+}
+
+enum ChatScope {
+  CHAT_SCOPE_UNSPECIFIED = 0;
+  CHAT_SCOPE_NEARBY = 1;
+  CHAT_SCOPE_MAP = 2;
+  CHAT_SCOPE_SPACE = 3;
+  CHAT_SCOPE_DM = 4;
+}
+
+// Estado público de um jogador dentro de uma sala.
+message PlayerState {
+  string player_id = 1;
+  string display_name = 2;
+  string role = 3;            // owner|admin|builder|moderator|member|guest
+  uint32 x = 4;               // em tiles
+  uint32 y = 5;
+  Direction dir = 6;
+  bool moving = 7;
+  bool ghost = 8;
+  uint32 emote_id = 9;        // 0 = nenhum
+  map<string, string> avatar = 10; // camada → itemId (ex.: "hair" → "hair_short_brown")
+}
+
+// ── Cliente → Servidor ───────────────────────────────────────────
+
+message ClientMessage {
+  uint32 seq = 1;
+  oneof payload {
+    JoinRequest join = 10;
+    MoveIntent move = 11;
+    Interact interact = 12;
+    ChatSend chat = 13;
+    EmoteSet emote = 14;
+    GhostSet ghost = 15;
+    Ping ping = 16;
+  }
+}
+
+message JoinRequest {
+  string token = 1;           // JWT (ou token de guest)
+  string space_slug = 2;
+  string map_id = 3;          // vazio = mapa inicial do espaço
+}
+
+// Intenção de movimento: uma direção (andar 1 tile) OU um tile alvo
+// (clique-para-andar; servidor valida passo a passo).
+message MoveIntent {
+  Direction dir = 1;
+  optional uint32 target_x = 2;
+  optional uint32 target_y = 3;
+}
+
+message Interact {
+  string object_id = 1;
+}
+
+message ChatSend {
+  ChatScope scope = 1;
+  string body = 2;
+  string target_user_id = 3;  // apenas para DM
+}
+
+message EmoteSet {
+  uint32 emote_id = 1;        // 0 = limpar
+}
+
+message GhostSet {
+  bool enabled = 1;
+}
+
+message Ping {
+  uint64 client_time_ms = 1;
+}
+
+// ── Servidor → Cliente ───────────────────────────────────────────
+
+message ServerMessage {
+  oneof payload {
+    JoinAck join_ack = 10;
+    PlayerJoined player_joined = 11;
+    PlayerLeft player_left = 12;
+    MovementDelta movement = 13;
+    Teleport teleport = 14;
+    MediaGroups media = 15;
+    ChatMessage chat = 16;
+    EmoteUpdate emote = 17;
+    ModerationAction moderation = 19;
+    MapUpdated map_updated = 20;
+    Error error = 98;
+    Pong pong = 99;
+  }
+}
+
+message JoinAck {
+  string player_id = 1;
+  string map_id = 2;
+  uint32 map_version = 3;
+  repeated PlayerState players = 4; // estado completo da sala, incluindo você
+}
+
+message PlayerJoined {
+  PlayerState player = 1;
+}
+
+message PlayerLeft {
+  string player_id = 1;
+}
+
+// Lote de movimentos de um tick do servidor (20 Hz).
+message MovementDelta {
+  uint32 tick = 1;
+  repeated Movement moves = 2;
+  message Movement {
+    string player_id = 1;
+    uint32 x = 2;
+    uint32 y = 3;
+    Direction dir = 4;
+    bool moving = 5;
+  }
+}
+
+message Teleport {
+  string player_id = 1;
+  string map_id = 2;          // pode ser outro mapa (portal)
+  uint32 x = 3;
+  uint32 y = 4;
+}
+
+// Grupos de mídia calculados pelo servidor (proximidade, área privada, spotlight).
+// O cliente conecta/desconecta tracks no SFU conforme instruído.
+message MediaGroups {
+  string livekit_token = 1;   // renovado quando permissões mudam
+  repeated string hear_player_ids = 2;   // quem você deve ouvir/ver
+  repeated string spotlight_player_ids = 3;
+  string private_area_id = 4; // vazio = fora de área privada
+}
+
+message ChatMessage {
+  ChatScope scope = 1;
+  string sender_id = 2;
+  string sender_name = 3;
+  string body = 4;
+  uint64 sent_at_ms = 5;
+}
+
+message EmoteUpdate {
+  string player_id = 1;
+  uint32 emote_id = 2;        // 0 = removido
+}
+
+message ModerationAction {
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    KIND_KICKED = 1;
+    KIND_BANNED = 2;
+    KIND_MUTED = 3;
+    KIND_UNMUTED = 4;
+  }
+  Kind kind = 1;
+  string reason = 2;
+}
+
+message MapUpdated {
+  string map_id = 1;
+  uint32 map_version = 2;     // cliente deve rebaixar o mapa (Fase 5: edição ao vivo)
+}
+
+message Error {
+  string code = 1;            // ex.: "unauthorized", "map_not_found", "rate_limited"
+  string message = 2;
+}
+
+message Pong {
+  uint64 client_time_ms = 1;  // eco do Ping (medição de RTT)
+  uint64 server_time_ms = 2;
+}

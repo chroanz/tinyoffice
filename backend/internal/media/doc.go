@@ -1,5 +1,6 @@
-// Package media integra o game server ao SFU (LiveKit): emissão de tokens de
-// acesso, tradução dos grupos de proximidade/área/spotlight calculados pelo
-// package game em subscriptions e permissões no lado do SFU (defesa em
-// profundidade, RNF-12). Fase 2 do roadmap.
+// Package media integra o game server ao SFU (LiveKit): emissão de tokens
+// de acesso à sala de mídia de cada mapa. Os grupos de quem-ouve-quem são
+// calculados pelo package game e enviados ao cliente, que ajusta as
+// subscriptions. Aplicar as permissões também no lado do SFU (defesa em
+// profundidade, RNF-12) fica para a sequência da Fase 2.
 package media

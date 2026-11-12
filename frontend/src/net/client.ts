@@ -1,4 +1,12 @@
-import type { ClientMessage, Direction, JoinAck, ServerMessage } from "./messages";
+import type {
+  AvatarConfig,
+  ChatScope,
+  ClientMessage,
+  Direction,
+  EmoteId,
+  JoinAck,
+  ServerMessage,
+} from "./messages";
 
 const PING_INTERVAL_MS = 15_000;
 const RECONNECT_MAX_MS = 10_000;
@@ -22,6 +30,7 @@ class GameClient {
 
   private ws: WebSocket | null = null;
   private name = "";
+  private avatar: AvatarConfig | undefined;
   private wanted = false; // usuário quer estar conectado
   private reconnectDelay = 1000;
   private pingTimer: ReturnType<typeof setInterval> | null = null;
@@ -36,8 +45,9 @@ class GameClient {
     return () => this.listeners[event].delete(fn);
   }
 
-  connect(name: string) {
+  connect(name: string, avatar?: AvatarConfig) {
     this.name = name;
+    this.avatar = avatar;
     this.wanted = true;
     this.open("connecting");
   }
@@ -53,6 +63,14 @@ class GameClient {
     this.send({ type: "move", dir });
   }
 
+  chat(scope: ChatScope, text: string) {
+    this.send({ type: "chat", scope, text });
+  }
+
+  emote(emote: EmoteId) {
+    this.send({ type: "emote", emote });
+  }
+
   private open(status: ClientStatus) {
     this.setStatus(status);
     const proto = location.protocol === "https:" ? "wss:" : "ws:";
@@ -61,7 +79,7 @@ class GameClient {
 
     ws.onopen = () => {
       this.reconnectDelay = 1000;
-      this.send({ type: "join", name: this.name });
+      this.send({ type: "join", name: this.name, avatar: this.avatar });
     };
 
     ws.onmessage = (ev) => {

@@ -32,9 +32,11 @@ func Load() Config {
 		RedisURL:    getenv("PIXELROOMS_REDIS_URL", "redis://localhost:6379/0"),
 		JWTSecret:   getenv("PIXELROOMS_JWT_SECRET", "dev-secret-nao-usar-em-producao"),
 
+		// Defaults do modo dev do LiveKit (livekit-server --dev).
+		// Em produção estes valores DEVEM ser sobrescritos.
 		LiveKitURL:       getenv("PIXELROOMS_LIVEKIT_URL", "ws://localhost:7880"),
-		LiveKitAPIKey:    os.Getenv("PIXELROOMS_LIVEKIT_API_KEY"),
-		LiveKitAPISecret: os.Getenv("PIXELROOMS_LIVEKIT_API_SECRET"),
+		LiveKitAPIKey:    getenv("PIXELROOMS_LIVEKIT_API_KEY", "devkey"),
+		LiveKitAPISecret: getenv("PIXELROOMS_LIVEKIT_API_SECRET", "secret"),
 	}
 }
 

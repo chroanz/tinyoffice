@@ -1,6 +1,140 @@
 {
-  "$schema": "../schemas/avatar-manifest.schema.json",
-  "frameSize": { "w": 32, "h": 64 },
-  "sheetLayout": "6 colunas × 5 linhas (idle×2, walk×4; linhas: down, up, left, right, sit)",
-  "items": []
+ "frameSize": {
+  "h": 64,
+  "w": 32
+ },
+ "sheetLayout": "6 colunas × 5 linhas (idle×2, walk×4; linhas: down, up, left, right, sit)",
+ "layers": [
+  "body",
+  "top",
+  "hair"
+ ],
+ "items": [
+  {
+   "id": "light",
+   "layer": "body",
+   "sheet": "avatars/body/light.png",
+   "label": "Clara",
+   "color": "#f6cfae",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "medium",
+   "layer": "body",
+   "sheet": "avatars/body/medium.png",
+   "label": "Média",
+   "color": "#d49a6a",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dark",
+   "layer": "body",
+   "sheet": "avatars/body/dark.png",
+   "label": "Escura",
+   "color": "#8f5a3c",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "blue",
+   "layer": "top",
+   "sheet": "avatars/top/blue.png",
+   "label": "Azul",
+   "color": "#4f8ad6",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "green",
+   "layer": "top",
+   "sheet": "avatars/top/green.png",
+   "label": "Verde",
+   "color": "#4fb36a",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "red",
+   "layer": "top",
+   "sheet": "avatars/top/red.png",
+   "label": "Ruivo",
+   "color": "#d9574a",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "yellow",
+   "layer": "top",
+   "sheet": "avatars/top/yellow.png",
+   "label": "Amarelo",
+   "color": "#f2c84b",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "purple",
+   "layer": "top",
+   "sheet": "avatars/top/purple.png",
+   "label": "Roxo",
+   "color": "#9b6ad6",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "white",
+   "layer": "top",
+   "sheet": "avatars/top/white.png",
+   "label": "Branco",
+   "color": "#f2f2ee",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "brown",
+   "layer": "hair",
+   "sheet": "avatars/hair/brown.png",
+   "label": "Castanho",
+   "color": "#6b4423",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "black",
+   "layer": "hair",
+   "sheet": "avatars/hair/black.png",
+   "label": "Preto",
+   "color": "#2d2a33",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "blonde",
+   "layer": "hair",
+   "sheet": "avatars/hair/blonde.png",
+   "label": "Loiro",
+   "color": "#e8c35f",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "red",
+   "layer": "hair",
+   "sheet": "avatars/hair/red.png",
+   "label": "Ruivo",
+   "color": "#c24a2e",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "blue",
+   "layer": "hair",
+   "sheet": "avatars/hair/blue.png",
+   "label": "Azul",
+   "color": "#4a79d9",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  }
+ ]
 }

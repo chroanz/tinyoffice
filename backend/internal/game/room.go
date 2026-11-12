@@ -23,9 +23,10 @@ const (
 )
 
 type joinRequest struct {
-	sess  Session
-	name  string
-	reply chan *Player
+	sess   Session
+	name   string
+	avatar *protocol.Avatar
+	reply  chan *Player
 }
 
 type moveIntent struct {
@@ -33,31 +34,48 @@ type moveIntent struct {
 	dir      string
 }
 
+type chatIntent struct {
+	playerID string
+	scope    string
+	text     string
+}
+
+type emoteIntent struct {
+	playerID string
+	emote    string
+}
+
 // Room é uma instância ativa de um mapa. Todo o estado é confinado à
 // goroutine de run(); a comunicação externa acontece pelos channels.
 type Room struct {
-	ID    string
-	world *maps.Compiled
+	ID     string
+	world  *maps.Compiled
+	minter MediaTokenMinter // nil = mídia desligada (testes)
 
 	players map[string]*Player
 
 	joinCh  chan joinRequest
 	leaveCh chan string
 	moveCh  chan moveIntent
+	chatCh  chan chatIntent
+	emoteCh chan emoteIntent
 	stopCh  chan struct{}
 
 	tick      uint64
 	tickMoves []protocol.Move
 }
 
-func NewRoom(id string, world *maps.Compiled) *Room {
+func NewRoom(id string, world *maps.Compiled, minter MediaTokenMinter) *Room {
 	r := &Room{
 		ID:      id,
 		world:   world,
+		minter:  minter,
 		players: make(map[string]*Player),
 		joinCh:  make(chan joinRequest),
 		leaveCh: make(chan string, 16),
 		moveCh:  make(chan moveIntent, 256),
+		chatCh:  make(chan chatIntent, 64),
+		emoteCh: make(chan emoteIntent, 64),
 		stopCh:  make(chan struct{}),
 	}
 	go r.run()
@@ -65,9 +83,9 @@ func NewRoom(id string, world *maps.Compiled) *Room {
 }
 
 // Join adiciona a sessão à sala e devolve o jogador criado (bloqueante,
-// respondido pela goroutine da sala).
-func (r *Room) Join(sess Session, name string) *Player {
-	req := joinRequest{sess: sess, name: name, reply: make(chan *Player, 1)}
+// respondido pela goroutine da sala). avatar nil usa o padrão.
+func (r *Room) Join(sess Session, name string, avatar *protocol.Avatar) *Player {
+	req := joinRequest{sess: sess, name: name, avatar: avatar, reply: make(chan *Player, 1)}
 	select {
 	case r.joinCh <- req:
 		return <-req.reply
@@ -83,6 +101,23 @@ func (r *Room) Move(playerID, dir string) {
 	default:
 		// Fila cheia: descartar é seguro — o cliente reconcilia com o
 		// próximo delta autoritativo.
+	}
+}
+
+// Chat registra uma mensagem de texto para o escopo dado (nearby|map).
+func (r *Room) Chat(playerID, scope, text string) {
+	select {
+	case r.chatCh <- chatIntent{playerID: playerID, scope: scope, text: text}:
+	default:
+		// Fila cheia: a mensagem é descartada (proteção contra flood).
+	}
+}
+
+// Emote registra uma reação rápida sobre a cabeça do avatar.
+func (r *Room) Emote(playerID, emote string) {
+	select {
+	case r.emoteCh <- emoteIntent{playerID: playerID, emote: emote}:
+	default:
 	}
 }
 
@@ -111,6 +146,10 @@ func (r *Room) run() {
 			r.handleLeave(id)
 		case in := <-r.moveCh:
 			r.handleMove(in)
+		case in := <-r.chatCh:
+			r.handleChat(in)
+		case in := <-r.emoteCh:
+			r.handleEmote(in)
 		case <-ticker.C:
 			r.flushTick()
 		}
@@ -120,12 +159,13 @@ func (r *Room) run() {
 func (r *Room) handleJoin(req joinRequest) {
 	spawn := r.world.Spawns[rand.IntN(len(r.world.Spawns))]
 	p := &Player{
-		ID:   newPlayerID(),
-		Name: req.name,
-		X:    spawn.X,
-		Y:    spawn.Y,
-		Dir:  protocol.DirDown,
-		sess: req.sess,
+		ID:     newPlayerID(),
+		Name:   req.name,
+		Avatar: normalizeAvatar(req.avatar),
+		X:      spawn.X,
+		Y:      spawn.Y,
+		Dir:    protocol.DirDown,
+		sess:   req.sess,
 	}
 
 	states := make([]protocol.PlayerState, 0, len(r.players)+1)
@@ -149,6 +189,14 @@ func (r *Room) handleJoin(req joinRequest) {
 		Type:   protocol.SPlayerJoined,
 		Player: &st,
 	}))
+
+	// Mídia: credenciais do SFU + primeiro estado de quem ouvir; os demais
+	// jogadores afetados recebem o diff via recomputeMedia.
+	r.mintMediaToken(p)
+	p.hears = r.desiredHearing(p)
+	r.sendMedia(p)
+	r.recomputeMedia()
+
 	slog.Info("player joined", "room", r.ID, "player", p.ID, "name", p.Name, "online", len(r.players))
 }
 
@@ -161,6 +209,7 @@ func (r *Room) handleLeave(id string) {
 		Type:     protocol.SPlayerLeft,
 		PlayerID: id,
 	}))
+	r.recomputeMedia()
 	slog.Info("player left", "room", r.ID, "player", id, "online", len(r.players))
 }
 
@@ -190,7 +239,23 @@ func (r *Room) handleMove(in moveIntent) {
 		p.X, p.Y = nx, ny
 		p.lastStep = now
 		r.queueMove(protocol.Move{ID: p.ID, X: p.X, Y: p.Y, Dir: p.Dir, Moving: true})
+		if target, ok := r.world.PortalAt(nx, ny); ok {
+			r.teleport(p, target.X, target.Y)
+		}
+		r.recomputeMedia()
 	}
+}
+
+// teleport move o jogador instantaneamente e avisa a sala inteira —
+// inclusive o próprio, que deve descartar a predição e "snapar".
+func (r *Room) teleport(p *Player, x, y int) {
+	p.X, p.Y = x, y
+	r.broadcastExcept("", protocol.Marshal(protocol.ServerMessage{
+		Type:     protocol.STeleport,
+		PlayerID: p.ID,
+		X:        x,
+		Y:        y,
+	}))
 }
 
 // queueMove acumula o movimento para o broadcast do tick, substituindo uma

@@ -1,6 +1,8 @@
-// genassets gera os assets placeholder da Fase 1 (CC0): tileset básico,
-// spritesheet de avatar (grade da ESPECIFICACAO.md §5.2) e o mapa template
-// "lobby" no formato Tiled (.tmj, convenções da §5.6).
+// genassets gera os assets gráficos do PixelRooms (CC0, feitos do zero):
+// tileset, spritesheets de avatar por camada (grade da ESPECIFICACAO.md
+// §5.2), pôster de exemplo e o mapa template "lobby" no formato Tiled
+// (.tmj, convenções da §5.6). O estilo e as técnicas estão em
+// docs/art-style.md; a arte em si está em art.go.
 //
 // Uso: go run ./cmd/genassets [-out ../assets]
 //
@@ -25,126 +27,116 @@ func main() {
 	out := flag.String("out", "../assets", "diretório raiz de assets")
 	flag.Parse()
 
-	writePNG(filepath.Join(*out, "tilesets", "basic.png"), tileset())
-	writePNG(filepath.Join(*out, "avatars", "body", "placeholder.png"), avatarSheet())
-	writeJSON(filepath.Join(*out, "maps", "templates", "lobby.tmj"), lobbyMap())
+	tiles := tileCatalog()
+	img, gids := renderTileset(tiles)
+	writePNG(filepath.Join(*out, "tilesets", "basic.png"), img)
+	names := make([]string, len(tiles))
+	for i, t := range tiles {
+		names[i] = t.name
+	}
+	writeJSON(filepath.Join(*out, "tilesets", "manifest.json"), map[string]any{
+		"tileSize": tile,
+		"items": []map[string]any{{
+			"id": "basic", "file": "tilesets/basic.png", "columns": tilesetColumns,
+			"tiles": names, "license": "CC0", "author": "PixelRooms (gerado por cmd/genassets)",
+		}},
+	})
+
+	manifest := avatarManifest()
+	for _, item := range manifest.Items {
+		writePNG(filepath.Join(*out, item.Sheet), avatarSheet(item.Layer, item.ID))
+	}
+	writeJSON(filepath.Join(*out, "avatars", "manifest.json"), manifest)
+
+	writePNG(filepath.Join(*out, "objects", "poster-pixelrooms.png"), posterImage())
+	writeJSON(filepath.Join(*out, "objects", "manifest.json"), map[string]any{
+		"items": []map[string]any{{
+			"id": "poster-pixelrooms", "file": "objects/poster-pixelrooms.png",
+			"license": "CC0", "author": "PixelRooms (gerado por cmd/genassets)",
+		}},
+	})
+
+	writeJSON(filepath.Join(*out, "maps", "templates", "lobby.tmj"), lobbyMap(gids, len(tiles)))
 	log.Println("assets gerados em", *out)
 }
 
-// ── Tileset ──────────────────────────────────────────────────────
-// 5 tiles de 32×32 (gids 1..5): piso A, piso B, parede, caixote, tapete.
+// ── Manifesto do avatar ───────────────────────────────────────────
 
-func tileset() *image.RGBA {
-	img := image.NewRGBA(image.Rect(0, 0, 5*tile, tile))
-
-	floorA := rgb(0xd4, 0xb4, 0x8c)
-	floorB := rgb(0xcb, 0xaa, 0x82)
-	fillTile(img, 0, floorA)
-	speckle(img, 0, rgb(0xc6, 0xa5, 0x7c))
-	fillTile(img, 1, floorB)
-	speckle(img, 1, rgb(0xbd, 0x9c, 0x73))
-
-	// Parede: corpo escuro com topo iluminado e base sombreada.
-	fillTile(img, 2, rgb(0x6b, 0x5d, 0x4f))
-	hband(img, 2, 0, 6, rgb(0x8a, 0x7a, 0x68))
-	hband(img, 2, 28, 4, rgb(0x4e, 0x44, 0x3a))
-
-	// Caixote: madeira com borda e travessas.
-	fillTile(img, 3, rgb(0xa9, 0x74, 0x3e))
-	border(img, 3, 2, rgb(0x7c, 0x54, 0x26))
-	hband(img, 3, 15, 2, rgb(0x7c, 0x54, 0x26))
-	vband(img, 3, 15, 2, rgb(0x7c, 0x54, 0x26))
-
-	// Tapete.
-	fillTile(img, 4, rgb(0x4e, 0x8f, 0x8b))
-	border(img, 4, 2, rgb(0x3d, 0x72, 0x6f))
-
-	return img
+type avatarItem struct {
+	ID      string `json:"id"`
+	Layer   string `json:"layer"`
+	Sheet   string `json:"sheet"`
+	Label   string `json:"label"`
+	Color   string `json:"color"`
+	License string `json:"license"`
+	Author  string `json:"author"`
 }
 
-// ── Avatar ───────────────────────────────────────────────────────
-// Sheet 192×320: frames 32×64, colunas [idle1 idle2 walk1..4],
-// linhas [down up left right sit]. Linha sit fica vazia na Fase 1.
-
-func avatarSheet() *image.RGBA {
-	img := image.NewRGBA(image.Rect(0, 0, 6*32, 5*64))
-	dirs := []string{"down", "up", "left", "right"}
-	for row, dir := range dirs {
-		for col := 0; col < 6; col++ {
-			drawAvatarFrame(img, col*32, row*64, dir, col)
-		}
-	}
-	return img
+type avatarManifestT struct {
+	FrameSize   map[string]int `json:"frameSize"`
+	SheetLayout string         `json:"sheetLayout"`
+	Layers      []string       `json:"layers"`
+	Items       []avatarItem   `json:"items"`
 }
 
+// Ordem estável para o manifesto e para o seletor na UI (espelhada em
+// backend/internal/game/avatar.go e frontend/src/game/avatarCatalog.ts).
 var (
-	skin  = rgb(0xed, 0xbd, 0x94)
-	hair  = rgb(0x5a, 0x3b, 0x28)
-	shirt = rgb(0x4f, 0x86, 0xc6)
-	pants = rgb(0x3f, 0x4a, 0x5a)
-	shoes = rgb(0x2b, 0x32, 0x40)
-	eyes  = rgb(0x2b, 0x2b, 0x33)
+	skinOrder = []string{"light", "medium", "dark"}
+	hairOrder = []string{"brown", "black", "blonde", "red", "blue"}
+	topOrder  = []string{"blue", "green", "red", "yellow", "purple", "white"}
+	labels    = map[string]string{
+		"light": "Clara", "medium": "Média", "dark": "Escura",
+		"brown": "Castanho", "black": "Preto", "blonde": "Loiro", "red": "Ruivo", "blue": "Azul",
+		"green": "Verde", "yellow": "Amarelo", "purple": "Roxo", "white": "Branco",
+	}
 )
 
-// drawAvatarFrame desenha um frame na posição (ox, oy) do sheet.
-// col: 0-1 idle, 2-5 ciclo de caminhada (esq, neutro, dir, neutro).
-func drawAvatarFrame(img *image.RGBA, ox, oy int, dir string, col int) {
-	r := func(x, y, w, h int, c color.RGBA) { fillRect(img, ox+x, oy+y, w, h, c) }
-
-	// Pernas: no ciclo de caminhada uma perna encolhe 3px alternadamente.
-	leftLift, rightLift := 0, 0
-	switch col {
-	case 2:
-		leftLift = 3
-	case 4:
-		rightLift = 3
+func avatarManifest() avatarManifestT {
+	m := avatarManifestT{
+		FrameSize:   map[string]int{"w": 32, "h": 64},
+		SheetLayout: "6 colunas × 5 linhas (idle×2, walk×4; linhas: down, up, left, right, sit)",
+		Layers:      []string{"body", "top", "hair"},
 	}
-	r(10, 48+leftLift, 5, 10-leftLift, pants)
-	r(17, 48+rightLift, 5, 10-rightLift, pants)
-	r(10, 56+leftLift/2, 5, 2, shoes)
-	r(17, 56+rightLift/2, 5, 2, shoes)
-
-	// Torso e braços.
-	r(9, 36, 14, 13, shirt)
-	r(7, 38, 2, 8, shirt)
-	r(23, 38, 2, 8, shirt)
-	r(7, 44, 2, 3, skin)
-	r(23, 44, 2, 3, skin)
-
-	// Cabeça.
-	r(9, 22, 14, 15, skin)
-
-	switch dir {
-	case "up":
-		// De costas: cabelo cobre a cabeça inteira.
-		r(9, 20, 14, 13, hair)
-	case "down":
-		r(9, 20, 14, 7, hair)
-		r(8, 22, 2, 6, hair)
-		r(22, 22, 2, 6, hair)
-		blinkEyes(r, col, 12, 18)
-	case "left":
-		r(9, 20, 14, 7, hair)
-		r(21, 22, 3, 9, hair) // nuca à direita do frame
-		blinkEyes(r, col, 10, -1)
-	case "right":
-		r(9, 20, 14, 7, hair)
-		r(8, 22, 3, 9, hair)
-		blinkEyes(r, col, 20, -1)
+	add := func(layer string, ids []string, key rune) {
+		for _, id := range ids {
+			c := avatarPalette(layer, id)[key]
+			m.Items = append(m.Items, avatarItem{
+				ID: id, Layer: layer, Sheet: "avatars/" + layer + "/" + id + ".png",
+				Label: labels[id], Color: hexColor(c),
+				License: "CC0", Author: "PixelRooms (gerado por cmd/genassets)",
+			})
+		}
 	}
+	add("body", skinOrder, 'S')
+	add("top", topOrder, 'T')
+	add("hair", hairOrder, 'H')
+	return m
 }
 
-// blinkEyes desenha os olhos; no frame idle2 (col 1) eles piscam.
-// x2 < 0 desenha um único olho (perfil).
-func blinkEyes(r func(x, y, w, h int, c color.RGBA), col, x1, x2 int) {
-	h := 2
-	if col == 1 {
-		h = 1
+// ── Pôster (objeto "image") ─────────────────────────────────────
+
+func posterImage() *image.RGBA {
+	const w, h = 192, 256
+	img := image.NewRGBA(image.Rect(0, 0, w, h))
+	fillRect(img, 0, 0, w, h, hex("#1a1b26"))
+	fillRect(img, 8, 8, w-16, h-16, hex("#24283b"))
+	for y := 0; y < 6; y++ {
+		for x := 0; x < 8; x++ {
+			c := hex("#45953a")
+			if (x+y)%3 == 0 {
+				c = hex("#b7ec8d")
+			} else if (x*y)%5 == 1 {
+				c = hex("#5fb6ec")
+			}
+			fillRect(img, 24+x*18, 40+y*18, 14, 14, c)
+		}
 	}
-	r(x1, 29, 2, h, eyes)
-	if x2 >= 0 {
-		r(x2, 29, 2, h, eyes)
-	}
+	fillRect(img, 24, 160, 144, 10, hex("#ffffff"))
+	fillRect(img, 24, 180, 96, 6, hex("#a0a8c0"))
+	fillRect(img, 24, 194, 120, 6, hex("#a0a8c0"))
+	fillRect(img, 24, 208, 72, 6, hex("#a0a8c0"))
+	return img
 }
 
 // ── Mapa lobby ───────────────────────────────────────────────────
@@ -154,83 +146,285 @@ const (
 	lobbyH = 20
 )
 
-// gids do tileset "basic" (firstgid = 1)
+// Sala de reunião (área privada): perímetro de parede com porta em (25,12);
+// interior 5×5 com tapete roxo.
 const (
-	gFloorA = 1
-	gFloorB = 2
-	gWall   = 3
-	gCrate  = 4
-	gRug    = 5
+	roomX0, roomY0 = 22, 12
+	roomX1, roomY1 = 28, 18
+	doorX          = 25
 )
 
-var crates = [][2]int{
-	{6, 6}, {7, 6}, {6, 7},
-	{22, 5}, {23, 5},
-	{10, 14}, {11, 14},
-	{21, 14}, {22, 14},
+// Palco (spotlight): tapete vermelho 4×2 no topo, com 2 tiles spotlight.
+const (
+	stageX0, stageY0 = 13, 2
+	stageX1, stageY1 = 16, 3
+)
+
+// Portais: pisar em `pad` teleporta para `target` (que nunca é outro
+// portal, senão haveria loop).
+var portals = []struct{ padX, padY, targetX, targetY int }{
+	{2, 2, 26, 2},
+	{27, 2, 3, 2},
 }
 
-func lobbyMap() map[string]any {
-	ground := make([]int, lobbyW*lobbyH)
-	objects := make([]int, lobbyW*lobbyH)
-	above := make([]int, lobbyW*lobbyH)
+// Objetos interativos: sobreposições na parede de cima (y=0, já bloqueada)
+// e um pôster na parede da sala. O jogador interage de um tile adjacente.
+type interactable struct {
+	x, y, w        int
+	tiles          []string
+	id, typ, title string
+	url, text      string
+	rng            int
+}
 
-	for y := 0; y < lobbyH; y++ {
-		for x := 0; x < lobbyW; x++ {
-			i := y*lobbyW + x
-			if (x+y)%2 == 0 {
-				ground[i] = gFloorA
-			} else {
-				ground[i] = gFloorB
+var interactables = []interactable{
+	{x: 8, y: 0, w: 2, tiles: []string{"whiteboard_l", "whiteboard_r"}, id: "quadro-branco", typ: "iframe",
+		title: "Quadro branco", url: "https://excalidraw.com/", rng: 1},
+	{x: 19, y: 0, w: 2, tiles: []string{"tv_l", "tv_r"}, id: "tv-lobby", typ: "video",
+		title: "TV do lobby", url: "https://www.youtube.com/embed/jfKfPfyJRdk", rng: 1},
+	{x: 4, y: 0, w: 1, tiles: []string{"board"}, id: "mural", typ: "note", title: "Mural de avisos",
+		text: "Bem-vindo ao PixelRooms!\n\n• Ande com WASD/setas ou clique no chão.\n• Chegue perto de alguém para abrir vídeo e áudio.\n• A sala roxa à direita é uma área privada.\n• Suba no palco vermelho para falar com o mapa inteiro.\n• Aperte X perto de objetos para interagir, 1–6 para emotes e ? para os atalhos.", rng: 1},
+	{x: 24, y: 12, w: 1, tiles: []string{"poster"}, id: "poster", typ: "image", title: "Pôster",
+		url: "/assets/objects/poster-pixelrooms.png", rng: 1},
+	{x: 26, y: 0, w: 1, tiles: []string{"board"}, id: "link-tiled", typ: "link",
+		title: "Editor de mapas (Tiled)", url: "https://www.mapeditor.org/", rng: 1},
+}
+
+type lobbyBuilder struct {
+	gids                   map[string]int
+	ground, objects, above []int
+	solid                  []bool
+}
+
+func (b *lobbyBuilder) g(name string) int {
+	gid, ok := b.gids[name]
+	if !ok {
+		log.Fatalf("tile desconhecido: %q", name)
+	}
+	return gid
+}
+
+func (b *lobbyBuilder) put(layer []int, x, y int, name string) { layer[y*lobbyW+x] = b.g(name) }
+
+// block coloca um tile em Objects e marca colisão.
+func (b *lobbyBuilder) block(x, y int, name string) {
+	b.put(b.objects, x, y, name)
+	b.solid[y*lobbyW+x] = true
+}
+
+// rug aplica um 9-slice de tapete no retângulo inclusivo.
+func (b *lobbyBuilder) rug(name string, x0, y0, x1, y1 int) {
+	for y := y0; y <= y1; y++ {
+		for x := x0; x <= x1; x++ {
+			part := "c"
+			switch {
+			case y == y0 && x == x0:
+				part = "tl"
+			case y == y0 && x == x1:
+				part = "tr"
+			case y == y1 && x == x0:
+				part = "bl"
+			case y == y1 && x == x1:
+				part = "br"
+			case y == y0:
+				part = "t"
+			case y == y1:
+				part = "b"
+			case x == x0:
+				part = "l"
+			case x == x1:
+				part = "r"
 			}
-			if x >= 12 && x <= 17 && y >= 8 && y <= 11 {
-				ground[i] = gRug
-			}
-			if x == 0 || x == lobbyW-1 || y == 0 || y == lobbyH-1 {
-				objects[i] = gWall
-			}
+			b.put(b.ground, x, y, name+"_"+part)
 		}
 	}
-	for _, c := range crates {
-		objects[c[1]*lobbyW+c[0]] = gCrate
+}
+
+func lobbyMap(gids map[string]int, tileCount int) map[string]any {
+	n := lobbyW * lobbyH
+	b := &lobbyBuilder{
+		gids: gids, ground: make([]int, n), objects: make([]int, n), above: make([]int, n), solid: make([]bool, n),
 	}
 
-	// Efeitos: colisão da borda, dos caixotes e spawn 2×2 no tapete.
-	effects := []map[string]any{
-		effectRect(1, "impassable", 0, 0, lobbyW*tile, tile),
-		effectRect(2, "impassable", 0, (lobbyH-1)*tile, lobbyW*tile, tile),
-		effectRect(3, "impassable", 0, tile, tile, (lobbyH-2)*tile),
-		effectRect(4, "impassable", (lobbyW-1)*tile, tile, tile, (lobbyH-2)*tile),
+	// Pisos: madeira por padrão, pátio de grama (sudoeste), cozinha de
+	// cerâmica (nordeste).
+	for y := 0; y < lobbyH; y++ {
+		for x := 0; x < lobbyW; x++ {
+			name := "floor_wood"
+			if (x*7+y*13)%5 == 0 {
+				name = "floor_wood_b"
+			}
+			if x >= 1 && x <= 8 && y >= 13 && y <= 18 {
+				name = "grass"
+				if (x*5+y*3)%4 == 0 {
+					name = "grass_b"
+				}
+			}
+			if x >= 21 && x <= 28 && y >= 1 && y <= 6 {
+				name = "floor_tile"
+				if (x+y)%3 == 0 {
+					name = "floor_tile_b"
+				}
+			}
+			b.put(b.ground, x, y, name)
+		}
 	}
-	id := 5
-	for _, c := range crates {
-		effects = append(effects, effectRect(id, "impassable", c[0]*tile, c[1]*tile, tile, tile))
+	b.rug("rug_teal", 12, 8, 17, 11)
+	b.rug("rug_purple", roomX0+1, roomY0+1, roomX1-1, roomY1-1)
+	b.rug("rug_stage", stageX0, stageY0, stageX1, stageY1)
+	b.put(b.ground, 14, 2, "spotlight")
+	b.put(b.ground, 15, 2, "spotlight")
+
+	// Paredes externas: face na parede de cima, topo nas demais.
+	for x := 0; x < lobbyW; x++ {
+		b.block(x, 0, "wall_front")
+		b.block(x, lobbyH-1, "wall_top")
+	}
+	for y := 1; y < lobbyH-1; y++ {
+		b.block(0, y, "wall_top")
+		b.block(lobbyW-1, y, "wall_top")
+	}
+	b.put(b.objects, 12, 0, "window")
+	b.put(b.objects, 17, 0, "window")
+	b.put(b.objects, 23, 0, "window")
+
+	// Sala de reunião: face em cima (com porta), topo nos lados e embaixo.
+	for x := roomX0; x <= roomX1; x++ {
+		if x != doorX {
+			b.block(x, roomY0, "wall_front")
+		}
+		b.block(x, roomY1, "wall_top")
+	}
+	for y := roomY0 + 1; y < roomY1; y++ {
+		b.block(roomX0, y, "wall_top")
+		b.block(roomX1, y, "wall_top")
+	}
+
+	// Escritório (noroeste): mesas 2×1 com cadeiras (cadeira é transitável:
+	// pisar nela = sentar).
+	for _, d := range [][2]int{{3, 4}, {6, 4}, {3, 8}, {6, 8}} {
+		b.block(d[0], d[1], "desk_l")
+		b.block(d[0]+1, d[1], "desk_r")
+		b.put(b.objects, d[0], d[1]+1, "chair")
+	}
+	// Estante alta: base bloqueia, topo vai na camada Above (sobre a parede).
+	b.block(10, 1, "bookshelf_bot")
+	b.put(b.above, 10, 0, "bookshelf_top")
+
+	// Cozinha (nordeste).
+	b.block(22, 1, "cooler")
+	b.block(27, 5, "boxes")
+	b.block(28, 5, "boxes")
+	b.block(25, 3, "table")
+	b.put(b.objects, 25, 4, "chair")
+
+	// Lounge (centro-sul) e pátio (sudoeste).
+	b.block(17, 14, "couch_l")
+	b.block(18, 14, "couch_r")
+	b.block(17, 16, "table")
+	b.block(20, 14, "plant")
+	b.block(4, 15, "table")
+	b.put(b.objects, 4, 16, "chair")
+	for _, p := range [][2]int{{1, 1}, {12, 7}, {17, 7}, {2, 14}, {7, 17}, {28, 18}} {
+		b.block(p[0], p[1], "plant")
+	}
+
+	for _, p := range portals {
+		b.put(b.objects, p.padX, p.padY, "portal")
+	}
+	for _, it := range interactables {
+		for dx, name := range it.tiles {
+			b.block(it.x+dx, it.y, name)
+		}
+	}
+
+	// ── Camada Effects ──
+	id := 1
+	var effects []map[string]any
+	addRect := func(effect string, x, y, w, h int, extra ...map[string]any) {
+		r := effectRect(id, effect, x, y, w, h)
+		if len(extra) > 0 {
+			props := r["properties"].([]map[string]any)
+			r["properties"] = append(props, extra...)
+		}
+		effects = append(effects, r)
 		id++
 	}
-	effects = append(effects, effectRect(id, "spawn", 14*tile, 9*tile, 2*tile, 2*tile))
+	// Colisão: um retângulo por linha contígua de tiles sólidos.
+	for y := 0; y < lobbyH; y++ {
+		for x := 0; x < lobbyW; {
+			if !b.solid[y*lobbyW+x] {
+				x++
+				continue
+			}
+			x0 := x
+			for x < lobbyW && b.solid[y*lobbyW+x] {
+				x++
+			}
+			addRect("impassable", x0*tile, y*tile, (x-x0)*tile, tile)
+		}
+	}
+	addRect("private", (roomX0+1)*tile, (roomY0+1)*tile, (roomX1-roomX0-1)*tile, (roomY1-roomY0-1)*tile,
+		map[string]any{"name": "areaId", "type": "string", "value": "sala-reuniao"})
+	addRect("spotlight", 14*tile, 2*tile, 2*tile, tile)
+	for _, p := range portals {
+		addRect("portal", p.padX*tile, p.padY*tile, tile, tile,
+			map[string]any{"name": "targetX", "type": "int", "value": p.targetX},
+			map[string]any{"name": "targetY", "type": "int", "value": p.targetY})
+	}
+	addRect("spawn", 14*tile, 9*tile, 2*tile, 2*tile)
 
+	// ── Camada Interactables (ESPECIFICACAO.md §5.6) ──
+	var objs []map[string]any
+	for _, it := range interactables {
+		props := []map[string]any{
+			{"name": "objectId", "type": "string", "value": it.id},
+			{"name": "type", "type": "string", "value": it.typ},
+			{"name": "title", "type": "string", "value": it.title},
+			{"name": "range", "type": "int", "value": it.rng},
+		}
+		if it.url != "" {
+			props = append(props, map[string]any{"name": "url", "type": "string", "value": it.url})
+		}
+		if it.text != "" {
+			props = append(props, map[string]any{"name": "text", "type": "string", "value": it.text})
+		}
+		objs = append(objs, map[string]any{
+			"id": id, "name": it.id, "x": it.x * tile, "y": it.y * tile,
+			"width": it.w * tile, "height": tile,
+			"rotation": 0, "visible": true, "point": false, "properties": props,
+		})
+		id++
+	}
+
+	rows := (tileCount + tilesetColumns - 1) / tilesetColumns
 	return map[string]any{
 		"type": "map", "version": "1.10", "tiledversion": "1.10.2",
 		"orientation": "orthogonal", "renderorder": "right-down",
 		"infinite": false, "compressionlevel": -1,
 		"width": lobbyW, "height": lobbyH,
 		"tilewidth": tile, "tileheight": tile,
-		"nextlayerid": 6, "nextobjectid": id + 1,
+		"nextlayerid": 7, "nextobjectid": id + 1,
 		"tilesets": []map[string]any{{
 			"firstgid": 1, "name": "basic",
 			"image":      "../../tilesets/basic.png",
-			"imagewidth": 5 * tile, "imageheight": tile,
+			"imagewidth": tilesetColumns * tile, "imageheight": rows * tile,
 			"tilewidth": tile, "tileheight": tile,
-			"tilecount": 5, "columns": 5, "margin": 0, "spacing": 0,
+			"tilecount": tileCount, "columns": tilesetColumns, "margin": 0, "spacing": 0,
 		}},
 		"layers": []map[string]any{
-			tileLayer(1, "Ground", ground),
-			tileLayer(2, "Objects", objects),
-			tileLayer(3, "Above", above),
+			tileLayer(1, "Ground", b.ground),
+			tileLayer(2, "Objects", b.objects),
+			tileLayer(3, "Above", b.above),
 			{
 				"id": 4, "name": "Effects", "type": "objectgroup",
 				"visible": true, "opacity": 1, "x": 0, "y": 0,
 				"draworder": "topdown", "objects": effects,
+			},
+			{
+				"id": 5, "name": "Interactables", "type": "objectgroup",
+				"visible": true, "opacity": 1, "x": 0, "y": 0,
+				"draworder": "topdown", "objects": objs,
 			},
 		},
 	}
@@ -253,9 +447,13 @@ func effectRect(id int, effect string, x, y, w, h int) map[string]any {
 	}
 }
 
-// ── Helpers de desenho ───────────────────────────────────────────
+// ── Helpers ──────────────────────────────────────────────────────
 
-func rgb(r, g, b uint8) color.RGBA { return color.RGBA{r, g, b, 0xff} }
+func hexColor(c color.RGBA) string {
+	const hx = "0123456789abcdef"
+	b := []byte{'#', hx[c.R>>4], hx[c.R&15], hx[c.G>>4], hx[c.G&15], hx[c.B>>4], hx[c.B&15]}
+	return string(b)
+}
 
 func fillRect(img *image.RGBA, x, y, w, h int, c color.RGBA) {
 	for dy := 0; dy < h; dy++ {
@@ -264,30 +462,6 @@ func fillRect(img *image.RGBA, x, y, w, h int, c color.RGBA) {
 		}
 	}
 }
-
-func fillTile(img *image.RGBA, idx int, c color.RGBA)     { fillRect(img, idx*tile, 0, tile, tile, c) }
-func hband(img *image.RGBA, idx, y, h int, c color.RGBA)  { fillRect(img, idx*tile, y, tile, h, c) }
-func vband(img *image.RGBA, idx, x, w int, c color.RGBA)  { fillRect(img, idx*tile+x, 0, w, tile, c) }
-
-func border(img *image.RGBA, idx, w int, c color.RGBA) {
-	hband(img, idx, 0, w, c)
-	hband(img, idx, tile-w, w, c)
-	vband(img, idx, 0, w, c)
-	vband(img, idx, tile-w, w, c)
-}
-
-// speckle adiciona pontos determinísticos para dar textura ao piso.
-func speckle(img *image.RGBA, idx int, c color.RGBA) {
-	for y := 0; y < tile; y++ {
-		for x := 0; x < tile; x++ {
-			if (x*31+y*17+idx*7)%23 == 0 {
-				img.SetRGBA(idx*tile+x, y, c)
-			}
-		}
-	}
-}
-
-// ── IO ───────────────────────────────────────────────────────────
 
 func writePNG(path string, img image.Image) {
 	mustMkdir(path)

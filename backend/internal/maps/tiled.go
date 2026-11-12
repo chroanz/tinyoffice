@@ -48,3 +48,13 @@ func (o tmjObject) stringProp(name string) string {
 	}
 	return ""
 }
+
+// intProp lê uma propriedade numérica (JSON decodifica números como float64).
+func (o tmjObject) intProp(name string) (int, bool) {
+	if v, ok := o.prop(name); ok {
+		if f, ok := v.(float64); ok {
+			return int(f), true
+		}
+	}
+	return 0, false
+}

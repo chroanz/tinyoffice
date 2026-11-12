@@ -3,6 +3,11 @@
 Como criar sprites e tilesets compatíveis com o PixelRooms. Especificação completa
 em [ESPECIFICACAO.md §5](../ESPECIFICACAO.md#5-especificação-gráfica--pixel-art-tiles-e-sprites).
 
+Estilo visual (paleta, contornos, perspectiva, resolução de desenho) e a análise das
+referências estão em [art-style.md](./art-style.md). A arte embutida é gerada por
+`backend/cmd/genassets` (ASCII art → PNG); contribuições desenhadas à mão devem seguir
+as mesmas regras.
+
 Essenciais:
 
 - **Tiles**: 32×32 px, PNG-24 com alfa, sem margin/spacing no tileset.

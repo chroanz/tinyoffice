@@ -32,17 +32,17 @@ services:
       timeout: 3s
       retries: 10
 
-  # --- Fase 2 (MVP de mídia) ---
-  # livekit:
-  #   image: livekit/livekit-server:latest
-  #   command: --config /etc/livekit.yaml
-  #   ports:
-  #     - "7880:7880"   # API/WebSocket
-  #     - "7881:7881"   # TCP fallback
-  #     - "50000-50100:50000-50100/udp"
-  #   volumes:
-  #     - ./deploy/livekit.yaml:/etc/livekit.yaml
-  #
+  # SFU de vídeo/áudio (Fase 2). O modo --dev usa as credenciais
+  # devkey/secret — as mesmas dos defaults do backend em dev.
+  # Em produção: config própria (deploy/livekit.yaml) e chaves fortes.
+  livekit:
+    image: livekit/livekit-server:v1.9
+    command: --dev --bind 0.0.0.0
+    # host network: WebRTC usa portas UDP dinâmicas; em dev isso evita
+    # mapear intervalos de portas um a um.
+    network_mode: host
+
+  # --- Fases futuras ---
   # coturn:
   #   image: coturn/coturn:latest
   #   network_mode: host

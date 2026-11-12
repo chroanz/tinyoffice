@@ -1,3 +1,10 @@
 {
-  "items": []
+ "items": [
+  {
+   "author": "PixelRooms (gerado por cmd/genassets)",
+   "file": "objects/poster-pixelrooms.png",
+   "id": "poster-pixelrooms",
+   "license": "CC0"
+  }
+ ]
 }

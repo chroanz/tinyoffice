@@ -67,7 +67,7 @@ func newTestRoom(t *testing.T) *Room {
 	if err != nil {
 		t.Fatalf("Compile: %v", err)
 	}
-	r := NewRoom("test", world)
+	r := NewRoom("test", world, nil)
 	t.Cleanup(r.Stop)
 	return r
 }
@@ -76,7 +76,7 @@ func TestJoinSendsAckAndNotifiesOthers(t *testing.T) {
 	room := newTestRoom(t)
 	s1, s2 := newFakeSession(), newFakeSession()
 
-	p1 := room.Join(s1, "alice")
+	p1 := room.Join(s1, "alice", nil)
 	ack1 := s1.wait(t, protocol.SJoinAck)
 	if ack1.PlayerID != p1.ID || len(ack1.Players) != 1 {
 		t.Fatalf("join_ack errado: %+v", ack1)
@@ -85,7 +85,7 @@ func TestJoinSendsAckAndNotifiesOthers(t *testing.T) {
 		t.Fatalf("spawn errado: %d,%d", p1.X, p1.Y)
 	}
 
-	p2 := room.Join(s2, "bob")
+	p2 := room.Join(s2, "bob", nil)
 	ack2 := s2.wait(t, protocol.SJoinAck)
 	if len(ack2.Players) != 2 {
 		t.Fatalf("join_ack de p2 deveria listar 2 jogadores: %+v", ack2)
@@ -99,8 +99,8 @@ func TestJoinSendsAckAndNotifiesOthers(t *testing.T) {
 func TestMovementIsValidatedAndBroadcast(t *testing.T) {
 	room := newTestRoom(t)
 	s1, s2 := newFakeSession(), newFakeSession()
-	p1 := room.Join(s1, "alice")
-	room.Join(s2, "bob")
+	p1 := room.Join(s1, "alice", nil)
+	room.Join(s2, "bob", nil)
 	s1.wait(t, protocol.SJoinAck)
 	s2.wait(t, protocol.SJoinAck)
 
@@ -124,7 +124,7 @@ func TestMovementIsValidatedAndBroadcast(t *testing.T) {
 func TestMovementCooldownRejectsFastSteps(t *testing.T) {
 	room := newTestRoom(t)
 	s1 := newFakeSession()
-	p1 := room.Join(s1, "alice")
+	p1 := room.Join(s1, "alice", nil)
 	s1.wait(t, protocol.SJoinAck)
 
 	room.Move(p1.ID, protocol.DirRight) // ok: (2,1)

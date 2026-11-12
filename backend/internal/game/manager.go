@@ -21,13 +21,14 @@ var validMapID = regexp.MustCompile(`^[a-z0-9-]{1,64}$`)
 // templates .tmj no diretório de assets.
 type Manager struct {
 	assetsDir string
+	minter    MediaTokenMinter
 
 	mu    sync.Mutex
 	rooms map[string]*Room
 }
 
-func NewManager(assetsDir string) *Manager {
-	return &Manager{assetsDir: assetsDir, rooms: make(map[string]*Room)}
+func NewManager(assetsDir string, minter MediaTokenMinter) *Manager {
+	return &Manager{assetsDir: assetsDir, minter: minter, rooms: make(map[string]*Room)}
 }
 
 // Room devolve a sala do mapa pedido, carregando e compilando o template na
@@ -56,7 +57,7 @@ func (m *Manager) Room(id string) (*Room, error) {
 		return nil, fmt.Errorf("mapa %q inválido: %w", id, err)
 	}
 
-	r := NewRoom(id, world)
+	r := NewRoom(id, world, m.minter)
 	m.rooms[id] = r
 	return r, nil
 }

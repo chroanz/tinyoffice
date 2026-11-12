@@ -1,4 +1,5 @@
 import Phaser from "phaser";
+import { AVATAR_CATALOG, AVATAR_LAYERS, sheetURL, textureKey } from "../avatarCatalog";
 import { TILE_SIZE } from "../constants";
 import { client } from "../../net/client";
 import type { JoinAck } from "../../net/messages";
@@ -15,10 +16,14 @@ export class BootScene extends Phaser.Scene {
   preload() {
     this.load.tilemapTiledJSON("lobby", "/assets/maps/templates/lobby.tmj");
     this.load.image("tiles", "/assets/tilesets/basic.png");
-    this.load.spritesheet("avatar", "/assets/avatars/body/placeholder.png", {
-      frameWidth: 32,
-      frameHeight: 64,
-    });
+    for (const layer of AVATAR_LAYERS) {
+      for (const item of AVATAR_CATALOG[layer]) {
+        this.load.spritesheet(textureKey(layer, item.id), sheetURL(layer, item.id), {
+          frameWidth: 32,
+          frameHeight: 64,
+        });
+      }
+    }
   }
 
   create() {

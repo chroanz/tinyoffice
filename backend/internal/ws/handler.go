@@ -51,7 +51,7 @@ func Handler(mgr *game.Manager) http.HandlerFunc {
 			return
 		}
 
-		player := room.Join(c, name)
+		player := room.Join(c, name, join.Avatar)
 		if player == nil {
 			return
 		}
@@ -65,6 +65,10 @@ func Handler(mgr *game.Manager) http.HandlerFunc {
 			switch msg.Type {
 			case protocol.CMove:
 				room.Move(player.ID, msg.Dir)
+			case protocol.CChat:
+				room.Chat(player.ID, msg.Scope, msg.Text)
+			case protocol.CEmote:
+				room.Emote(player.ID, msg.Emote)
 			case protocol.CPing:
 				c.Send(protocol.Marshal(protocol.ServerMessage{
 					Type:       protocol.SPong,

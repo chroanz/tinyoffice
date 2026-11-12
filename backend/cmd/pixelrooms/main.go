@@ -13,6 +13,7 @@ import (
 	"pixelrooms/backend/internal/api"
 	"pixelrooms/backend/internal/config"
 	"pixelrooms/backend/internal/game"
+	"pixelrooms/backend/internal/media"
 )
 
 func main() {
@@ -24,7 +25,13 @@ func main() {
 	}
 	slog.SetDefault(slog.New(handler))
 
-	rooms := game.NewManager(cfg.AssetsDir)
+	var minter game.MediaTokenMinter
+	if lk, err := media.NewLiveKit(cfg.LiveKitURL, cfg.LiveKitAPIKey, cfg.LiveKitAPISecret); err != nil {
+		slog.Warn("mídia desligada", "reason", err)
+	} else {
+		minter = lk
+	}
+	rooms := game.NewManager(cfg.AssetsDir, minter)
 
 	srv := &http.Server{
 		Addr:              cfg.Addr,

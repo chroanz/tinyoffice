@@ -1,6 +1,7 @@
 package game
 
 import (
+	"slices"
 	"strings"
 	"time"
 	"unicode"
@@ -16,6 +17,8 @@ const (
 	chatCooldown = 400 * time.Millisecond
 	// emoteCooldown evita spam de reações.
 	emoteCooldown = 250 * time.Millisecond
+	// profileCooldown limita trocas de nome/avatar (cada uma vai para a sala toda).
+	profileCooldown = time.Second
 )
 
 // Emotes aceitos (RF-AVATAR-05). Os ids são estáveis; o cliente mapeia para
@@ -72,7 +75,7 @@ func (r *Room) handleChat(in chatIntent) {
 // inclusive, para o próprio cliente só mostrar o que o servidor aceitou).
 func (r *Room) handleEmote(in emoteIntent) {
 	p, ok := r.players[in.playerID]
-	if !ok || !contains(Emotes, in.emote) {
+	if !ok || !slices.Contains(Emotes, in.emote) {
 		return
 	}
 	now := time.Now()
@@ -85,6 +88,28 @@ func (r *Room) handleEmote(in emoteIntent) {
 		PlayerID: p.ID,
 		Emote:    in.emote,
 	}))
+}
+
+// handleProfile aplica nome/avatar novos (avatar validado como no join) e
+// avisa a sala toda, inclusive o autor.
+func (r *Room) handleProfile(in profileIntent) {
+	p, ok := r.players[in.playerID]
+	if !ok {
+		return
+	}
+	now := time.Now()
+	if now.Sub(p.lastProfile) < profileCooldown {
+		return
+	}
+	p.lastProfile = now
+	if in.name != "" {
+		p.Name = in.name
+	}
+	if in.avatar != nil {
+		p.Avatar = normalizeAvatar(in.avatar)
+	}
+	st := p.state(false)
+	r.broadcastExcept("", protocol.Marshal(protocol.ServerMessage{Type: protocol.SPlayerUpdate, Player: &st}))
 }
 
 // sanitizeChat remove controle/quebras excessivas e limita o tamanho. O

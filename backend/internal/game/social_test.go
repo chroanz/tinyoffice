@@ -45,10 +45,22 @@ func TestChatNearbyOnlyReachesMediaGroup(t *testing.T) {
 	p3 := room.Join(s3, "carol", nil)
 	s3.wait(t, protocol.SJoinAck)
 
-	// carol se teleporta para longe via portal (5,1) → (10,1).
-	for i := 0; i < 4; i++ {
-		room.Move(p3.ID, protocol.DirRight)
+	// carol se teleporta para longe via portal (5,1) → (10,1). Ela nasce
+	// num tile livre perto do spawn (1,1), então anda até a linha 1 e
+	// depois para a direita até o portal.
+	x, y := p3.X, p3.Y
+	step := func(d string) {
+		room.Move(p3.ID, d)
 		time.Sleep(StepInterval + 20*time.Millisecond)
+	}
+	for ; y > 1; y-- {
+		step(protocol.DirUp)
+	}
+	for ; y < 1; y++ {
+		step(protocol.DirDown)
+	}
+	for ; x < 5; x++ {
+		step(protocol.DirRight)
 	}
 	s3.wait(t, protocol.STeleport)
 	// espera o diff de mídia em que carol não ouve mais ninguém
@@ -122,13 +134,48 @@ func TestJoinNormalizesAvatar(t *testing.T) {
 	room := NewRoom("a", mediaWorld(t), nil)
 	t.Cleanup(room.Stop)
 	s := newFakeSession()
-	p := room.Join(s, "x", &protocol.Avatar{Body: "dark", Hair: "nope", Top: "red"})
-	want := protocol.Avatar{Body: "dark", Hair: DefaultAvatar.Hair, Top: "red"}
+	p := room.Join(s, "x", &protocol.Avatar{Body: "tone5", Bottom: "skirt-black", Hair: "nope", Top: "dress-red", Hat: "cap-red", Bag: "backpack-blue"})
+	want := protocol.Avatar{Body: "tone5", Bottom: "skirt-black", Hair: DefaultAvatar.Hair, Top: "dress-red", Hat: "cap-red", Bag: "backpack-blue"}
 	if p.Avatar != want {
 		t.Fatalf("avatar normalizado errado: %+v", p.Avatar)
 	}
 	ack := s.wait(t, protocol.SJoinAck)
 	if ack.Players[0].Avatar != want {
 		t.Fatalf("join_ack sem avatar: %+v", ack.Players[0])
+	}
+}
+
+func TestJoinSpawnsOnFreeTiles(t *testing.T) {
+	room := NewRoom("a", mediaWorld(t), nil)
+	t.Cleanup(room.Stop)
+	seen := map[[2]int]bool{}
+	for i := 0; i < 8; i++ {
+		p := room.Join(newFakeSession(), "x", nil)
+		pos := [2]int{p.X, p.Y}
+		if seen[pos] {
+			t.Fatalf("jogador %d nasceu em tile ocupado: %v", i, pos)
+		}
+		seen[pos] = true
+	}
+}
+
+func TestProfileUpdateBroadcastsValidatedAvatar(t *testing.T) {
+	room, s1, s2, p1, _ := socialRoom(t)
+	room.UpdateProfile(p1.ID, "Alice Nova", &protocol.Avatar{Body: "tone6", Bottom: "skirt-wine", Top: "nope", Hair: "long-black"})
+	for _, s := range []*fakeSession{s1, s2} {
+		m := s.wait(t, protocol.SPlayerUpdate)
+		want := protocol.Avatar{Body: "tone6", Bottom: "skirt-wine", Top: DefaultAvatar.Top, Hair: "long-black", Hat: "none", Bag: "none"}
+		if m.Player == nil || m.Player.ID != p1.ID || m.Player.Name != "Alice Nova" || m.Player.Avatar != want {
+			t.Fatalf("player_updated errado: %+v", m.Player)
+		}
+	}
+	// segunda troca dentro do cooldown é ignorada
+	room.UpdateProfile(p1.ID, "Spam", nil)
+	select {
+	case raw := <-s2.msgs:
+		if strings.Contains(string(raw), "Spam") {
+			t.Fatalf("troca dentro do cooldown foi aplicada: %s", raw)
+		}
+	case <-time.After(150 * time.Millisecond):
 	}
 }

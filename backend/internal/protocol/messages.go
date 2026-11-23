@@ -23,11 +23,12 @@ const (
 
 // Tipos de mensagem cliente → servidor.
 const (
-	CJoin  = "join"
-	CMove  = "move"
-	CChat  = "chat"
-	CEmote = "emote"
-	CPing  = "ping"
+	CJoin    = "join"
+	CMove    = "move"
+	CChat    = "chat"
+	CEmote   = "emote"
+	CProfile = "profile" // troca de nome/avatar sem sair da sala
+	CPing    = "ping"
 )
 
 // Tipos de mensagem servidor → cliente.
@@ -35,6 +36,7 @@ const (
 	SJoinAck      = "join_ack"
 	SPlayerJoined = "player_joined"
 	SPlayerLeft   = "player_left"
+	SPlayerUpdate = "player_updated" // nome/avatar mudou (usa Player)
 	SMovement     = "movement"
 	STeleport     = "teleport"
 	SMedia        = "media"
@@ -48,17 +50,20 @@ const (
 // Os valores são ids de itens do manifesto de avatares; o servidor valida
 // contra a lista conhecida e aplica o padrão quando inválido.
 type Avatar struct {
-	Body string `json:"body"`
-	Hair string `json:"hair"`
-	Top  string `json:"top"`
+	Body   string `json:"body"`
+	Bottom string `json:"bottom"`
+	Top    string `json:"top"`
+	Hair   string `json:"hair"`
+	Hat    string `json:"hat"` // acessório de cabeça ("none" = sem)
+	Bag    string `json:"bag"` // mochila/bolsa ("none" = sem)
 }
 
 // ClientMessage é o envelope de toda mensagem recebida do cliente.
 type ClientMessage struct {
 	Type   string  `json:"type"`
-	Name   string  `json:"name,omitempty"`   // join
+	Name   string  `json:"name,omitempty"`   // join, profile
 	Map    string  `json:"map,omitempty"`    // join (vazio = mapa padrão)
-	Avatar *Avatar `json:"avatar,omitempty"` // join
+	Avatar *Avatar `json:"avatar,omitempty"` // join, profile
 	Dir    string  `json:"dir,omitempty"`    // move
 	Scope  string  `json:"scope,omitempty"`  // chat
 	Text   string  `json:"text,omitempty"`   // chat
@@ -95,7 +100,7 @@ type ServerMessage struct {
 	MapID    string        `json:"mapId,omitempty"`
 	Players  []PlayerState `json:"players,omitempty"`
 
-	// player_joined
+	// player_joined, player_updated
 	Player *PlayerState `json:"player,omitempty"`
 
 	// movement

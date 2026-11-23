@@ -54,7 +54,14 @@ export function bindGameStore(isChatOpen: () => boolean) {
   });
 
   client.on("message", (msg) => {
-    if (msg.type === "player_joined") {
+    if (msg.type === "player_updated") {
+      // nome/avatar novos; posição continua vindo do movimento
+      useGameStore.setState((s) => {
+        const p = s.players[msg.player.playerId];
+        if (!p) return s;
+        return { players: { ...s.players, [p.playerId]: { ...p, name: msg.player.name, avatar: msg.player.avatar } } };
+      });
+    } else if (msg.type === "player_joined") {
       useGameStore.setState((s) => ({
         players: { ...s.players, [msg.player.playerId]: msg.player },
       }));

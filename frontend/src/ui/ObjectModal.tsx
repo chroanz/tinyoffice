@@ -1,6 +1,8 @@
+import { ExternalLink, Image as ImageIcon, LayoutDashboard, StickyNote, Tv, X, type LucideIcon } from "lucide-react";
 import { useEffect, useRef } from "react";
 import type { NearbyObject } from "../state/gameStore";
 import { useUIStore } from "../state/uiStore";
+import { Kbd } from "./kit";
 
 /**
  * Conteúdo de um objeto interativo (RF-OBJ-03): iframe/vídeo embutidos
@@ -10,6 +12,7 @@ export function ObjectModal({ obj }: { obj: NearbyObject }) {
   const close = () => useUIStore.setState({ openObject: null });
   const wide = obj.type === "iframe" || obj.type === "video";
   const dialogRef = useRef<HTMLDivElement>(null);
+  const Icon = ICON[obj.type];
 
   // Foca o diálogo ao abrir para que Esc feche mesmo com um iframe dentro
   // (até o usuário clicar no iframe — aí o botão ✕ continua funcionando).
@@ -21,7 +24,7 @@ export function ObjectModal({ obj }: { obj: NearbyObject }) {
     <div
       ref={dialogRef}
       tabIndex={-1}
-      className="pointer-events-auto absolute inset-0 z-20 flex items-center justify-center bg-black/70 p-4 outline-none"
+      className="pointer-events-auto absolute inset-0 z-20 flex animate-fade-in items-center justify-center bg-ink-950/70 p-4 outline-none backdrop-blur-[2px]"
       onClick={close}
       onKeyDown={(e) => e.key === "Escape" && close()}
       role="dialog"
@@ -29,30 +32,33 @@ export function ObjectModal({ obj }: { obj: NearbyObject }) {
       aria-label={obj.title}
     >
       <div
-        className={`flex max-h-full flex-col overflow-hidden rounded-xl bg-slate-900 text-white shadow-2xl ring-1 ring-white/10 ${
+        className={`glass flex max-h-full animate-pop-in flex-col overflow-hidden rounded-[22px] text-white ${
           wide ? "h-[85vh] w-[90vw] max-w-6xl" : "w-full max-w-xl"
         }`}
         onClick={(e) => e.stopPropagation()}
       >
-        <header className="flex items-center gap-2 border-b border-white/10 px-4 py-2">
-          <span className="text-lg">{ICON[obj.type]}</span>
-          <h2 className="font-semibold">{obj.title}</h2>
+        <header className="flex items-center gap-3 border-b border-white/[0.06] py-2.5 pr-2.5 pl-3">
+          <span className="grid size-8 place-items-center rounded-xl bg-amber-300/15 text-amber-300">
+            <Icon className="size-4" />
+          </span>
+          <h2 className="mr-auto truncate text-sm font-semibold">{obj.title}</h2>
           {obj.url && (obj.type === "iframe" || obj.type === "video") && (
             <a
               href={obj.url}
               target="_blank"
               rel="noopener noreferrer"
-              className="ml-auto text-xs text-slate-400 hover:text-white"
+              className="focus-ring inline-flex h-8 items-center gap-1.5 rounded-lg px-2.5 text-xs font-medium text-ink-300 transition hover:bg-white/[0.08] hover:text-white"
             >
-              abrir em nova aba ↗
+              <ExternalLink className="size-3.5" /> Nova aba
             </a>
           )}
           <button
             onClick={close}
-            className={`rounded px-2 py-1 text-sm hover:bg-white/10 ${obj.url && wide ? "" : "ml-auto"}`}
+            className="focus-ring inline-flex h-8 items-center gap-2 rounded-lg pr-1.5 pl-2.5 text-ink-300 transition hover:bg-white/[0.08] hover:text-white"
             aria-label="Fechar"
           >
-            ✕ <span className="text-xs text-slate-400">Esc</span>
+            <X className="size-4" />
+            <Kbd>Esc</Kbd>
           </button>
         </header>
         <div className="min-h-0 flex-1 overflow-auto">
@@ -63,12 +69,12 @@ export function ObjectModal({ obj }: { obj: NearbyObject }) {
   );
 }
 
-const ICON: Record<NearbyObject["type"], string> = {
-  iframe: "🧩",
-  video: "📺",
-  image: "🖼️",
-  note: "📌",
-  link: "🔗",
+const ICON: Record<NearbyObject["type"], LucideIcon> = {
+  iframe: LayoutDashboard,
+  video: Tv,
+  image: ImageIcon,
+  note: StickyNote,
+  link: ExternalLink,
 };
 
 function Body({ obj }: { obj: NearbyObject }) {
@@ -95,19 +101,28 @@ function Body({ obj }: { obj: NearbyObject }) {
         />
       );
     case "note":
-      return <pre className="p-4 font-sans text-sm leading-relaxed whitespace-pre-wrap">{obj.text}</pre>;
+      return (
+        <pre className="p-6 font-sans text-[15px] leading-relaxed whitespace-pre-wrap text-ink-100 select-text">
+          {obj.text}
+        </pre>
+      );
     case "link":
       return (
-        <div className="p-6 text-center">
-          <p className="mb-4 text-sm text-slate-300">Este objeto abre um site externo:</p>
-          <p className="mb-6 truncate rounded bg-black/40 px-3 py-2 font-mono text-xs">{obj.url}</p>
+        <div className="p-8 text-center">
+          <span className="mx-auto mb-4 grid size-12 place-items-center rounded-2xl bg-white/[0.05] text-ink-300 ring-1 ring-white/[0.06]">
+            <ExternalLink className="size-5" />
+          </span>
+          <p className="mb-3 text-sm text-ink-300">Este objeto abre um site externo:</p>
+          <p className="mx-auto mb-6 max-w-md truncate rounded-xl bg-black/30 px-3 py-2 font-mono text-xs text-ink-200 ring-1 ring-white/[0.06]">
+            {obj.url}
+          </p>
           <a
             href={obj.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-block rounded-md bg-emerald-600 px-4 py-2 font-semibold hover:bg-emerald-500"
+            className="focus-ring inline-flex h-11 items-center gap-2 rounded-2xl bg-gradient-to-b from-brand-400 to-brand-600 px-5 text-sm font-semibold text-white shadow-[0_8px_24px_-6px_rgb(124_58_237/0.7)] transition hover:brightness-110 active:scale-[0.97]"
           >
-            Abrir em nova aba ↗
+            Abrir em nova aba <ExternalLink className="size-4" />
           </a>
         </div>
       );

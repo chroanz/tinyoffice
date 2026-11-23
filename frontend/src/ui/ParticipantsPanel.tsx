@@ -1,57 +1,95 @@
-import { AVATAR_CATALOG } from "../game/avatarCatalog";
+import { AudioLines, Megaphone, Search, Users } from "lucide-react";
+import { useState } from "react";
 import { useGameStore } from "../state/gameStore";
 import { useMediaStore } from "../state/mediaStore";
 import { useUIStore } from "../state/uiStore";
+import { AvatarHead } from "./AvatarView";
+import { cx, Panel } from "./kit";
 
-/** Lista de participantes online com status (RF-CHAT-03). */
+/** Lista de pessoas online com status (RF-CHAT-03). */
 export function ParticipantsPanel() {
   const players = useGameStore((s) => s.players);
   const selfId = useGameStore((s) => s.selfId);
   const hear = useMediaStore((s) => s.hear);
   const spotlights = useMediaStore((s) => s.spotlights);
   const speaking = useMediaStore((s) => s.speaking);
+  const [q, setQ] = useState("");
 
-  const list = Object.values(players).sort((a, b) =>
+  const all = Object.values(players).sort((a, b) =>
     a.playerId === selfId ? -1 : b.playerId === selfId ? 1 : a.name.localeCompare(b.name),
   );
+  const list = q ? all.filter((p) => p.name.toLowerCase().includes(q.toLowerCase())) : all;
+  const nearbyCount = all.filter((p) => p.playerId !== selfId && hear.includes(p.playerId)).length;
 
   return (
-    <aside
-      className="pointer-events-auto absolute top-36 left-3 flex max-h-[60%] w-64 flex-col rounded-xl bg-slate-900/90 text-sm text-white shadow-2xl ring-1 ring-white/10 backdrop-blur"
-      aria-label="Participantes"
+    <Panel
+      side="left"
+      icon={Users}
+      title={`Pessoas · ${all.length}`}
+      subtitle={nearbyCount ? `${nearbyCount} na sua conversa` : "Ninguém por perto ainda"}
+      onClose={() => useUIStore.setState({ participantsOpen: false })}
+      className="bottom-auto max-h-[calc(100%-10rem)]"
     >
-      <header className="flex items-center border-b border-white/10 p-2">
-        <span className="px-1 font-semibold">Online — {list.length}</span>
-        <button
-          onClick={() => useUIStore.setState({ participantsOpen: false })}
-          className="ml-auto rounded px-2 py-0.5 text-xs hover:bg-white/10"
-          aria-label="Fechar lista"
-        >
-          ✕
-        </button>
-      </header>
-      <ul className="overflow-y-auto p-1">
+      {all.length > 6 && (
+        <div className="px-3 pt-3">
+          <label className="flex h-9 items-center gap-2 rounded-xl bg-black/30 px-3 ring-1 ring-white/[0.08] focus-within:ring-2 focus-within:ring-brand-400">
+            <Search className="size-3.5 text-ink-400" />
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              onFocus={() => useUIStore.setState({ typing: true })}
+              onBlur={() => useUIStore.setState({ typing: false })}
+              placeholder="Buscar pessoa"
+              className="min-w-0 flex-1 bg-transparent text-[13px] text-white outline-none placeholder:text-ink-500"
+            />
+          </label>
+        </div>
+      )}
+      <ul className="thin-scroll overflow-y-auto p-2">
         {list.map((p) => {
           const self = p.playerId === selfId;
-          const top = AVATAR_CATALOG.top.find((t) => t.id === p.avatar?.top)?.color ?? "#888";
-          const tags: string[] = [];
-          if (spotlights.includes(p.playerId)) tags.push("🎤 no palco");
-          else if (!self && hear.includes(p.playerId)) tags.push("🔊 na conversa");
+          const talking = speaking.includes(p.playerId);
+          const onStage = spotlights.includes(p.playerId);
+          const near = !self && hear.includes(p.playerId);
           return (
-            <li key={p.playerId} className="flex items-center gap-2 rounded px-2 py-1 hover:bg-white/5">
+            <li key={p.playerId} className="flex items-center gap-3 rounded-xl px-2 py-1.5 transition hover:bg-white/[0.04]">
               <span
-                className={`h-3 w-3 shrink-0 rounded-full ${speaking.includes(p.playerId) ? "ring-2 ring-emerald-400" : ""}`}
-                style={{ background: top }}
-              />
-              <span className={`truncate ${self ? "text-emerald-300" : ""}`}>
-                {p.name}
-                {self && " (você)"}
+                className={cx(
+                  "relative rounded-xl bg-white/[0.05] p-0.5 transition",
+                  talking ? "ring-2 ring-live shadow-[0_0_14px_-2px_var(--color-live)]" : "ring-1 ring-white/[0.06]",
+                )}
+              >
+                <AvatarHead avatar={p.avatar} size={32} className="rounded-[10px]" />
               </span>
-              <span className="ml-auto shrink-0 text-[10px] text-slate-400">{tags.join(" ")}</span>
+              <div className="min-w-0 flex-1">
+                <div className="flex items-center gap-1.5">
+                  <span className="truncate text-[13px] font-medium text-white">{p.name}</span>
+                  {self && (
+                    <span className="rounded-md bg-brand-500/20 px-1.5 py-px text-[10px] font-semibold text-brand-300">
+                      você
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-1 text-[11px] text-ink-400">
+                  {onStage ? (
+                    <span className="inline-flex items-center gap-1 text-amber-300">
+                      <Megaphone className="size-3" /> no palco
+                    </span>
+                  ) : near ? (
+                    <span className="inline-flex items-center gap-1 text-live">
+                      <AudioLines className="size-3" /> na conversa
+                    </span>
+                  ) : (
+                    <span>{self ? "online" : "no mapa"}</span>
+                  )}
+                </div>
+              </div>
+              {talking && <AudioLines className="size-4 animate-pulse text-live" />}
             </li>
           );
         })}
+        {list.length === 0 && <li className="px-2 py-6 text-center text-xs text-ink-400">Ninguém com esse nome.</li>}
       </ul>
-    </aside>
+    </Panel>
   );
 }

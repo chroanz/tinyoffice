@@ -28,10 +28,11 @@ type Player struct {
 	Y      int
 	Dir    string
 
-	sess      Session
-	lastStep  time.Time
-	lastChat  time.Time
-	lastEmote time.Time
+	sess        Session
+	lastStep    time.Time
+	lastChat    time.Time
+	lastEmote   time.Time
+	lastProfile time.Time
 
 	// Mídia (Fase 2): quem este jogador ouve e suas credenciais no SFU.
 	hears          map[string]bool

@@ -67,6 +67,13 @@ class GameClient {
     this.send({ type: "chat", scope, text });
   }
 
+  /** Troca nome/avatar sem sair da sala; também vale para reconexões. */
+  updateProfile(name: string, avatar: AvatarConfig) {
+    this.name = name;
+    this.avatar = avatar;
+    this.send({ type: "profile", name, avatar });
+  }
+
   emote(emote: EmoteId) {
     this.send({ type: "emote", emote });
   }

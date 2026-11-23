@@ -10,14 +10,15 @@ export const PROXIMITY_RADIUS = 5;
 // Profundidade da camada "Above" (sempre acima dos avatares).
 export const ABOVE_DEPTH = 100_000;
 
-// Emotes: id (protocolo) → emoji exibido. Ordem = teclas 1–6.
+// Emotes: id (protocolo) → rótulo. Ordem = teclas 1–6 = colunas dos
+// sheets em pixel art assets/ui/emotes.png e emote-bubbles.png.
 export const EMOTES = [
-  { id: "wave", emoji: "👋", label: "Oi" },
-  { id: "heart", emoji: "❤️", label: "Amei" },
-  { id: "party", emoji: "🎉", label: "Festa" },
-  { id: "thumbsup", emoji: "👍", label: "Joinha" },
-  { id: "question", emoji: "❓", label: "Dúvida" },
-  { id: "laugh", emoji: "😂", label: "Risada" },
+  { id: "wave", label: "Oi" },
+  { id: "heart", label: "Amei" },
+  { id: "party", label: "Festa" },
+  { id: "thumbsup", label: "Joinha" },
+  { id: "question", label: "Dúvida" },
+  { id: "laugh", label: "Risada" },
 ] as const;
 
 // Quanto tempo um emote fica sobre a cabeça (o ❓ persiste até cancelar).

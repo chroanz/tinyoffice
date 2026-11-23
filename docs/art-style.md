@@ -42,6 +42,16 @@ sprite, tile, personagem ou paleta é copiado; as semelhanças ficam nas técnic
 | Móveis ("furni") | Catálogo enorme de peças pequenas e combináveis; o valor está na **variedade** e na recoloração (o mesmo móvel em várias cores). |
 | Avatar | ~64 px de altura, proporções quase realistas (cabeça menor que no Gather/Pokémon), 8 direções por ser isométrico, roupas por camadas. |
 
+### 1.3b RPG Maker (2000/XP/MV/MZ)
+
+| Aspecto | Técnica |
+|---|---|
+| Grid | 16×16 (2000), 32×32 (XP/VX) ou 48×48 (MV/MZ) por tile; personagens em frames de 24×32 (2000), 32×48 (XP) ou 48×48 (MV/MZ). |
+| Personagens | Chibi de 2–2,5 cabeças; 3 frames por direção (passo, parado, passo) × 4 direções; olhos grandes com ponto de brilho. |
+| Contornos | Escuros mas tingidos na silhueta; costuras internas mais suaves (cor escura do próprio material). |
+| Objetos | Vista 3/4: tampo claro + frente escura, pernas visíveis; detalhes pequenos que contam história (monitor em pé com brilho, teclado, caneca, papéis); **sombra de contato** no chão sob o móvel. |
+| Cadeiras | Desenhadas conforme o lado de quem senta: de costas quando a pessoa fica de frente para a mesa. |
+
 ### 1.4 O que é comum (e o que levamos)
 
 1. **Paleta limitada e deliberada** — poucas cores, em rampas curtas.
@@ -59,12 +69,13 @@ sprite, tile, personagem ou paleta é copiado; as semelhanças ficam nas técnic
 |---|---|
 | Resolução de desenho | **16×16 px por tile, ampliado 2× para os 32×32 do grid** (estética GBA; metade do trabalho por tile e consistência garantida). Avatar desenhado em 16×32 → 32×64. |
 | Paleta | ~56 cores em rampas de 4–5 tons com hue-shift (ver `backend/cmd/genassets/art.go`). |
-| Contorno | `#2b1d14` (marrom quase preto) em objetos e avatar; pisos sem contorno. |
+| Contorno | `#2b1d14` (marrom quase preto) em objetos; no avatar, a cor de cada material escurecida rumo a `#1d1426`; pisos sem contorno. |
 | Luz | Cima-esquerda. Topos e bordas superiores/esquerdas recebem o tom claro; direita/baixo o escuro. |
 | Paredes | Dois tiles: `wall_top` (topo escuro) e `wall_front` (face clara com rodapé de madeira). Objetos de parede (quadro, TV, mural, janela) são **sobreposições** desenhadas sobre a face. |
 | Tapetes | 9-slice gerado por código a partir de uma rampa (teal, roxo, vermelho/palco). |
+| Móveis | Sombra de contato semitransparente sob cada móvel; estações de trabalho com monitor em pé, teclado e cadeira de costas. |
 | Objetos altos | 2 tiles: a metade de cima vai na camada *Above*. |
-| Avatar | Cabeça ~45% da altura, olhos 2×2 (na escala 16), caminhada 4 frames por alternância de pernas, lado esquerdo espelhado do direito. Camadas: `body` (pele + olhos + calça + contorno), `top` (roupa), `hair`. |
+| Avatar | **Frame 32×32 de arte** (como os personagens de RPG de DS/B/W, tile 16×16), figura centralizada de ~16×27; PNG em 2× (64×64). Chibi: cabeça grande e arredondada (~45% da altura com o cabelo) sobre **corpo pequeno** (tronco 6 px de frente, 5 de lado; braços colados; pernas finas e juntas). Olhos 1×2 com ponto de brilho, bochechas rosadas. **Contorno seletivo**: escuro só na silhueta, costuras internas na sombra escura do material (Pokémon GBA / RPG Maker). Montado por partes (`backend/cmd/genassets/avatar.go`); caminhada de 4 frames com balanço, braços opostos às pernas e passada na vista lateral; piscada no idle. Camadas: `body`, `bottom`, `top`, `hair`, `hat` (boné, gorro, chapéu de aba — com chapéu o cabelo usa a variante `@hat`, sem os fios sob a copa). Tênis de 2 linhas com sola clara. |
 
 ## 3. Pipeline
 

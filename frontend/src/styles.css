@@ -1,4 +1,66 @@
 @import "tailwindcss";
+@import "@fontsource-variable/inter";
+@import "@fontsource/pixelify-sans/500.css";
+@import "@fontsource/pixelify-sans/700.css";
+
+/* ── Design tokens ─────────────────────────────────────────────────
+   Uma paleta só para a UI inteira: superfícies "meia-noite" levemente
+   arroxeadas (casam com o contorno roxo-escuro da pixel art), acento
+   violeta, verde para "ao vivo/falando", âmbar para palco, vermelho para
+   desligado. */
+@theme {
+  --font-sans: "Inter Variable", Inter, ui-sans-serif, system-ui, sans-serif;
+  --font-pixel: "Pixelify Sans", "Inter Variable", ui-sans-serif, sans-serif;
+
+  --color-ink-950: #08070d;
+  --color-ink-900: #0f0d18;
+  --color-ink-850: #141221;
+  --color-ink-800: #1a1729;
+  --color-ink-700: #252137;
+  --color-ink-600: #322d48;
+  --color-ink-500: #4a4466;
+  --color-ink-400: #6f6890;
+  --color-ink-300: #9a93b8;
+  --color-ink-200: #c7c2dc;
+  --color-ink-100: #ebe8f5;
+
+  --color-brand-300: #c4b5fd;
+  --color-brand-400: #a78bfa;
+  --color-brand-500: #8b5cf6;
+  --color-brand-600: #7c3aed;
+
+  --color-live: #4ade80;
+
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --animate-pop-in: pop-in 220ms var(--ease-spring) both;
+  --animate-fade-up: fade-up 260ms var(--ease-out-quint) both;
+  --animate-slide-left: slide-left 280ms var(--ease-out-quint) both;
+  --animate-slide-right: slide-right 280ms var(--ease-out-quint) both;
+  --animate-fade-in: fade-in 200ms ease-out both;
+
+  @keyframes pop-in {
+    from { opacity: 0; transform: translateY(6px) scale(0.94); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fade-up {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes slide-left {
+    from { opacity: 0; transform: translateX(16px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes slide-right {
+    from { opacity: 0; transform: translateX(-16px); }
+    to { opacity: 1; transform: none; }
+  }
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to { opacity: 1; }
+  }
+}
 
 html,
 body,
@@ -6,10 +68,93 @@ body,
   margin: 0;
   height: 100%;
   overflow: hidden;
-  background: #1a1b26;
+  background: var(--color-ink-950);
+  color: var(--color-ink-100);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  font-feature-settings: "cv11", "ss01";
 }
 
 /* Pixel art sem blur (RNF-27) */
-canvas {
+canvas,
+.pixelated {
   image-rendering: pixelated;
+}
+
+::selection {
+  background: color-mix(in oklab, var(--color-brand-500) 45%, transparent);
+}
+
+/* Superfície de vidro usada por todos os painéis flutuantes. */
+@utility glass {
+  background: color-mix(in oklab, var(--color-ink-900) 82%, transparent);
+  backdrop-filter: blur(18px) saturate(1.4);
+  -webkit-backdrop-filter: blur(18px) saturate(1.4);
+  border: 1px solid rgb(255 255 255 / 0.07);
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.05) inset,
+    0 18px 50px -12px rgb(0 0 0 / 0.6),
+    0 4px 14px -4px rgb(0 0 0 / 0.4);
+}
+
+@utility focus-ring {
+  outline: none;
+  &:focus-visible {
+    box-shadow: 0 0 0 2px var(--color-ink-900), 0 0 0 4px var(--color-brand-400);
+  }
+}
+
+/* Barras de rolagem discretas nos painéis. */
+@utility thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgb(255 255 255 / 0.14) transparent;
+}
+
+/* Prévia animada do avatar (paper-doll em CSS): cada camada anda pelas
+   colunas do sheet com steps(); a linha (direção) vem de --row. */
+@keyframes avatar-walk {
+  from { background-position-x: calc(var(--fw) * -2); }
+  to { background-position-x: calc(var(--fw) * -6); }
+}
+@keyframes avatar-idle {
+  0%, 92% { background-position-x: 0; }
+  92.01%, 100% { background-position-x: calc(var(--fw) * -1); }
+}
+.avatar-layer {
+  position: absolute;
+  inset: 0;
+  background-repeat: no-repeat;
+  background-position-y: calc(var(--fh) * var(--row) * -1);
+  image-rendering: pixelated;
+}
+.avatar-layer[data-anim="walk"] {
+  animation: avatar-walk 300ms steps(4) infinite;
+}
+.avatar-layer[data-anim="idle"] {
+  animation: avatar-idle 3.2s steps(1) infinite;
+}
+
+/* Reduzir movimento: do sistema (media query) ou das configurações do app. */
+:root[data-motion="reduce"] *,
+:root[data-motion="reduce"] *::before,
+:root[data-motion="reduce"] *::after {
+  animation-duration: 1ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 1ms !important;
+}
+:root[data-motion="reduce"] .avatar-layer[data-anim] {
+  animation: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+  }
+  .avatar-layer[data-anim] {
+    animation: none;
+  }
 }

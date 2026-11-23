@@ -40,6 +40,8 @@ var legend = map[rune]color.RGBA{
 	// folhas
 	'f': hex("#b7ec8d"), 'F': hex("#76c45a"), 'h': hex("#45953a"), 'H': hex("#2f6b2a"),
 	// cinzas (branco → grafite)
+	// sombra de contato no chão (semitransparente, premultiplicada)
+	'Z': {18, 10, 24, 72},
 	'0': hex("#f4f4f0"), '9': hex("#cfd0cc"), '8': hex("#9a9c98"), '7': hex("#666863"), '6': hex("#3b3c39"),
 }
 
@@ -342,18 +344,20 @@ var poster = lines(`
 ................
 ................`)
 
+// Mesa com monitor em pé (tela com brilho), base e teclado — a leitura 3/4
+// dos móveis de RPG Maker: tampo claro, frente mais escura, pernas.
 var deskL = lines(`
-................
-................
-................
-OOOOOOOOOOOOOOOO
-O111111111111111
-O122222OOOOOO222
-O122222OiiinO222
-O122222OiiinO222
-O122222OOOOOO222
-O122222288888222
-O222222222222222
+...OOOOOOO......
+...OiiiBnO......
+...OiBBBnO......
+OOOOBBBnnOOOOOOO
+O11OOOOOOO111111
+O1222O7O22222222
+O122OOOOO2222222
+O122222222222222
+O12222OOOOOOO222
+O12222O90909O222
+O22222OOOOOOO222
 O333333333333333
 O333333333333333
 O444444444444444
@@ -377,6 +381,58 @@ OOOOOOOOOOOOOOOO
 444444444444444O
 ............O4O.
 ............O4O.`)
+
+// Cadeira vista de costas (encosto à frente): usada nas estações de
+// trabalho, onde quem senta fica de frente para o monitor.
+var chairUp = lines(`
+................
+................
+................
+....OOOOOOOO....
+....O111111O....
+....O122221O....
+....O122221O....
+....O233332O....
+...OOOOOOOOOO...
+...O33333333O...
+...O44444444O...
+...OOOOOOOOOO...
+...O4O....O4O...
+...O4O....O4O...
+...OOO....OOO...
+................`)
+
+// withShadow acrescenta a sombra de contato (estilo RPG Maker) nas duas
+// últimas linhas, sob o móvel: ancora o objeto no chão.
+func withShadow(s sprite) sprite {
+	minX, maxX := len(s[0]), -1
+	for _, row := range s[len(s)/2:] {
+		for x, ch := range row {
+			if ch != '.' {
+				minX = min(minX, x)
+				maxX = max(maxX, x)
+			}
+		}
+	}
+	if maxX < 0 {
+		return s
+	}
+	out := append(sprite{}, s...)
+	for y := len(s) - 2; y < len(s); y++ {
+		r := []rune(out[y])
+		x0, x1 := minX+1, min(maxX+1, len(r)-1) // leve deslocamento para a direita (luz da esquerda)
+		if y == len(s)-1 {
+			x0++
+		}
+		for x := x0; x <= x1; x++ {
+			if r[x] == '.' {
+				r[x] = 'Z'
+			}
+		}
+		out[y] = string(r)
+	}
+	return out
+}
 
 var chair = lines(`
 ................
@@ -669,19 +725,20 @@ func tileCatalog() []tileDef {
 		{"tv_r", over(wallFront, mirror(tvL))},
 		{"board", over(wallFront, board)},
 		{"poster", over(wallFront, poster)},
-		{"desk_l", deskL},
-		{"desk_r", deskR},
-		{"chair", chair},
+		{"desk_l", withShadow(deskL)},
+		{"desk_r", withShadow(deskR)},
+		{"chair", withShadow(chair)},
+		{"chair_up", withShadow(chairUp)},
 		{"bookshelf_top", bookshelfTop},
-		{"bookshelf_bot", bookshelfBot},
-		{"plant", plant},
-		{"couch_l", couchL},
-		{"couch_r", mirror(couchL)},
-		{"table", table},
+		{"bookshelf_bot", withShadow(bookshelfBot)},
+		{"plant", withShadow(plant)},
+		{"couch_l", withShadow(couchL)},
+		{"couch_r", withShadow(mirror(couchL))},
+		{"table", withShadow(table)},
 		{"portal", portal},
 		{"spotlight", spotlight},
-		{"boxes", boxes},
-		{"cooler", cooler},
+		{"boxes", withShadow(boxes)},
+		{"cooler", withShadow(cooler)},
 	}
 	rugs := []struct {
 		name string
@@ -717,224 +774,4 @@ func renderTileset(tiles []tileDef) (*image.RGBA, map[string]int) {
 		gids[t.name] = i + 1
 	}
 	return img, gids
-}
-
-// ── Avatar (16×32 → 32×64) ────────────────────────────────────────
-// Legenda própria do avatar (cores variam por item, ver avatarPalette):
-//   S/s pele base/sombra, E olho, H/h cabelo, T/t roupa, D/d calça, K sapato.
-// O corpo (linhas 0..23) é ASCII; as pernas (24..31) são procedurais para
-// animar a caminhada.
-
-var avatarDown = lines(`
-................
-................
-.....OOOOOO.....
-....OHHHHHHO....
-...OHHHHHHHHO...
-...OHHHHHHHHO...
-...OHhSSSSShO...
-...OhSSSSSSSO...
-...OSSESSESSO...
-...OSSESSESSO...
-...OSSSSSSSSO...
-...OsSSSSSSsO...
-....OsSSSSsO....
-.....OOOOOO.....
-....OTTTTTTO....
-...OTTTTTTTTO...
-...OTTTTTTTTO...
-...OTTTTTTTTO...
-...OtTTTTTTtO...
-...OtTTTTTTtO...
-...OtTTTTTTtO...
-...OSOttttOSO...
-...OSOttttOSO...
-...OOOOOOOOOO...`)
-
-var avatarUp = lines(`
-................
-................
-.....OOOOOO.....
-....OHHHHHHO....
-...OHHHHHHHHO...
-...OHHHHHHHHO...
-...OHHHHHHHHO...
-...OHHHHHHHHO...
-...OHHHHHHHHO...
-...OhHHHHHHhO...
-...OhhHHHHhhO...
-...OshhhhhhsO...
-....OsSSSSsO....
-.....OOOOOO.....
-....OTTTTTTO....
-...OTTTTTTTTO...
-...OTTTTTTTTO...
-...OTTTTTTTTO...
-...OtTTTTTTtO...
-...OtTTTTTTtO...
-...OtTTTTTTtO...
-...OSOttttOSO...
-...OSOttttOSO...
-...OOOOOOOOOO...`)
-
-// Virado para a direita; a esquerda é espelhada.
-var avatarRight = lines(`
-................
-................
-.....OOOOOO.....
-....OHHHHHHO....
-...OHHHHHHHHO...
-...OHHHHHHHHO...
-...OHHHhSSSSO...
-...OHHhSSSSSO...
-...OHhSSSESSO...
-...OHhSSSESSO...
-...OhhSSSSSSO...
-...OshSSSSsO....
-....OsSSSsO.....
-.....OOOOO......
-....OTTTTTTO....
-...OTTTTTTTTO...
-...OTTTTTTTTO...
-...OTTTTTTTTO...
-...OtTTTTtTtO...
-...OtTTTTtTtO...
-...OtTTTTtTtO...
-...OttttOSOtO...
-...OttttOSOtO...
-...OOOOOOOOOO...`)
-
-// avatarLegs desenha as pernas (linhas 24..31) de um frame; lift = quantas
-// linhas (na escala 16) cada perna sobe (caminhada).
-func avatarLegs(liftL, liftR int) sprite {
-	rows := make([][]rune, 8)
-	for i := range rows {
-		rows[i] = []rune("................")
-	}
-	leg := func(x0 int, lift int, front bool) {
-		// perna de 4 colunas: contorno | calça | calça-sombra | contorno
-		for y := 0; y < 8-lift; y++ {
-			r := rows[y]
-			r[x0] = 'O'
-			r[x0+3] = 'O'
-			switch {
-			case y == 7-lift:
-				r[x0+1], r[x0+2] = 'O', 'O'
-			case y >= 5-lift:
-				r[x0+1], r[x0+2] = 'K', 'K'
-			default:
-				r[x0+1], r[x0+2] = 'D', 'd'
-			}
-		}
-	}
-	leg(4, liftL, true)
-	leg(8, liftR, false)
-	out := make(sprite, 8)
-	for i, r := range rows {
-		out[i] = string(r)
-	}
-	return out
-}
-
-// avatarFrame monta o frame completo (32 linhas) para direção e coluna:
-// col 0 idle, 1 idle piscando, 2..5 caminhada (esq, neutro, dir, neutro).
-func avatarFrame(dir string, col int) sprite {
-	var body sprite
-	switch dir {
-	case "down":
-		body = avatarDown
-	case "up":
-		body = avatarUp
-	case "right":
-		body = avatarRight
-	case "left":
-		body = mirror(avatarRight)
-	}
-	body = append(sprite{}, body...)
-	if col == 1 && dir != "up" {
-		// piscar: olhos de 1 px (a linha de cima vira pele)
-		body[8] = strings.ReplaceAll(body[8], "E", "S")
-	}
-	liftL, liftR := 0, 0
-	switch col {
-	case 2:
-		liftL = 2
-	case 4:
-		liftR = 2
-	}
-	return append(body, avatarLegs(liftL, liftR)...)
-}
-
-// avatarPalette devolve a legenda de cores variáveis de uma camada/item.
-func avatarPalette(layer, id string) map[rune]color.RGBA {
-	type ramp struct{ base, shade string }
-	skins := map[string]ramp{
-		"light": {"#f6cfae", "#dca483"}, "medium": {"#d49a6a", "#a9714a"}, "dark": {"#8f5a3c", "#64391f"},
-	}
-	hairs := map[string]ramp{
-		"brown": {"#6b4423", "#452a14"}, "black": {"#2d2a33", "#19171d"}, "blonde": {"#e8c35f", "#b48d31"},
-		"red": {"#c24a2e", "#7f2d1b"}, "blue": {"#4a79d9", "#2d4f9c"},
-	}
-	tops := map[string]ramp{
-		"blue": {"#4f8ad6", "#2f5c9c"}, "green": {"#4fb36a", "#2e7a45"}, "red": {"#d9574a", "#9a3328"},
-		"yellow": {"#f2c84b", "#b58a1f"}, "purple": {"#9b6ad6", "#67409a"}, "white": {"#f2f2ee", "#bdbdb8"},
-	}
-	p := map[rune]color.RGBA{}
-	switch layer {
-	case "body":
-		r := skins[id]
-		p['S'], p['s'] = hex(r.base), hex(r.shade)
-		p['E'] = hex("#2b1d14")
-		p['D'], p['d'] = hex("#3e4a66"), hex("#262e42")
-		p['K'] = hex("#4a3425")
-	case "hair":
-		r := hairs[id]
-		p['H'], p['h'] = hex(r.base), hex(r.shade)
-	case "top":
-		r := tops[id]
-		p['T'], p['t'] = hex(r.base), hex(r.shade)
-	}
-	return p
-}
-
-// avatarAllChars: legenda completa do avatar só para validação.
-var avatarAllChars = map[rune]color.RGBA{
-	'S': {}, 's': {}, 'E': {}, 'H': {}, 'h': {}, 'T': {}, 't': {}, 'D': {}, 'd': {}, 'K': {},
-}
-
-// layerChars diz quais caracteres cada camada desenha (o contorno fica no
-// corpo para um avatar sem cabelo/roupa continuar legível).
-var layerChars = map[string]string{
-	"body": "OSsEDdK",
-	"hair": "Hh",
-	"top":  "Tt",
-}
-
-// onlyChars mantém no sprite apenas os caracteres de keep.
-func onlyChars(s sprite, keep string) sprite {
-	out := make(sprite, len(s))
-	for i, row := range s {
-		r := []rune(row)
-		for j, ch := range r {
-			if !strings.ContainsRune(keep, ch) {
-				r[j] = '.'
-			}
-		}
-		out[i] = string(r)
-	}
-	return out
-}
-
-// avatarSheet gera o sheet 192×320 de uma camada/item.
-func avatarSheet(layer, id string) *image.RGBA {
-	img := image.NewRGBA(image.Rect(0, 0, 6*32, 5*64))
-	pal := avatarPalette(layer, id)
-	for row, dir := range []string{"down", "up", "left", "right"} {
-		for col := 0; col < 6; col++ {
-			frame := avatarFrame(dir, col)
-			frame.check(16, 32, "avatar "+dir, avatarAllChars)
-			blit(img, onlyChars(frame, layerChars[layer]), col*32, row*64, 2, pal)
-		}
-	}
-	return img
 }

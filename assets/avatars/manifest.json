@@ -1,140 +1,1620 @@
 {
  "frameSize": {
   "h": 64,
-  "w": 32
+  "w": 64
  },
- "sheetLayout": "6 colunas × 5 linhas (idle×2, walk×4; linhas: down, up, left, right, sit)",
- "layers": [
-  "body",
-  "top",
-  "hair"
- ],
  "items": [
   {
-   "id": "light",
+   "id": "tone1",
    "layer": "body",
-   "sheet": "avatars/body/light.png",
-   "label": "Clara",
-   "color": "#f6cfae",
+   "sheet": "avatars/body/tone1.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "medium",
+   "id": "tone2",
    "layer": "body",
-   "sheet": "avatars/body/medium.png",
-   "label": "Média",
-   "color": "#d49a6a",
+   "sheet": "avatars/body/tone2.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "dark",
+   "id": "tone3",
    "layer": "body",
-   "sheet": "avatars/body/dark.png",
-   "label": "Escura",
-   "color": "#8f5a3c",
+   "sheet": "avatars/body/tone3.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "blue",
+   "id": "tone4",
+   "layer": "body",
+   "sheet": "avatars/body/tone4.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tone5",
+   "layer": "body",
+   "sheet": "avatars/body/tone5.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tone6",
+   "layer": "body",
+   "sheet": "avatars/body/tone6.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "pants-denim",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/pants-denim.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "pants-black",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/pants-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "pants-khaki",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/pants-khaki.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "pants-gray",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/pants-gray.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "pants-wine",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/pants-wine.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "pants-pink",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/pants-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "shorts-denim",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/shorts-denim.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "shorts-black",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/shorts-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "shorts-khaki",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/shorts-khaki.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "shorts-gray",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/shorts-gray.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "shorts-wine",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/shorts-wine.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "shorts-pink",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/shorts-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "skirt-denim",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/skirt-denim.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "skirt-black",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/skirt-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "skirt-khaki",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/skirt-khaki.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "skirt-gray",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/skirt-gray.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "skirt-wine",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/skirt-wine.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "skirt-pink",
+   "layer": "bottom",
+   "sheet": "avatars/bottom/skirt-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tee-blue",
    "layer": "top",
-   "sheet": "avatars/top/blue.png",
-   "label": "Azul",
-   "color": "#4f8ad6",
+   "sheet": "avatars/top/tee-blue.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "green",
+   "id": "tee-teal",
    "layer": "top",
-   "sheet": "avatars/top/green.png",
-   "label": "Verde",
-   "color": "#4fb36a",
+   "sheet": "avatars/top/tee-teal.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "red",
+   "id": "tee-green",
    "layer": "top",
-   "sheet": "avatars/top/red.png",
-   "label": "Ruivo",
-   "color": "#d9574a",
+   "sheet": "avatars/top/tee-green.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "yellow",
+   "id": "tee-yellow",
    "layer": "top",
-   "sheet": "avatars/top/yellow.png",
-   "label": "Amarelo",
-   "color": "#f2c84b",
+   "sheet": "avatars/top/tee-yellow.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "purple",
+   "id": "tee-red",
    "layer": "top",
-   "sheet": "avatars/top/purple.png",
-   "label": "Roxo",
-   "color": "#9b6ad6",
+   "sheet": "avatars/top/tee-red.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "white",
+   "id": "tee-pink",
    "layer": "top",
-   "sheet": "avatars/top/white.png",
-   "label": "Branco",
-   "color": "#f2f2ee",
+   "sheet": "avatars/top/tee-pink.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "brown",
+   "id": "tee-purple",
+   "layer": "top",
+   "sheet": "avatars/top/tee-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tee-white",
+   "layer": "top",
+   "sheet": "avatars/top/tee-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tee-black",
+   "layer": "top",
+   "sheet": "avatars/top/tee-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tank-blue",
+   "layer": "top",
+   "sheet": "avatars/top/tank-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tank-teal",
+   "layer": "top",
+   "sheet": "avatars/top/tank-teal.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tank-green",
+   "layer": "top",
+   "sheet": "avatars/top/tank-green.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tank-yellow",
+   "layer": "top",
+   "sheet": "avatars/top/tank-yellow.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tank-red",
+   "layer": "top",
+   "sheet": "avatars/top/tank-red.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tank-pink",
+   "layer": "top",
+   "sheet": "avatars/top/tank-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tank-purple",
+   "layer": "top",
+   "sheet": "avatars/top/tank-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tank-white",
+   "layer": "top",
+   "sheet": "avatars/top/tank-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "tank-black",
+   "layer": "top",
+   "sheet": "avatars/top/tank-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "hoodie-blue",
+   "layer": "top",
+   "sheet": "avatars/top/hoodie-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "hoodie-teal",
+   "layer": "top",
+   "sheet": "avatars/top/hoodie-teal.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "hoodie-green",
+   "layer": "top",
+   "sheet": "avatars/top/hoodie-green.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "hoodie-yellow",
+   "layer": "top",
+   "sheet": "avatars/top/hoodie-yellow.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "hoodie-red",
+   "layer": "top",
+   "sheet": "avatars/top/hoodie-red.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "hoodie-pink",
+   "layer": "top",
+   "sheet": "avatars/top/hoodie-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "hoodie-purple",
+   "layer": "top",
+   "sheet": "avatars/top/hoodie-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "hoodie-white",
+   "layer": "top",
+   "sheet": "avatars/top/hoodie-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "hoodie-black",
+   "layer": "top",
+   "sheet": "avatars/top/hoodie-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "jacket-blue",
+   "layer": "top",
+   "sheet": "avatars/top/jacket-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "jacket-teal",
+   "layer": "top",
+   "sheet": "avatars/top/jacket-teal.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "jacket-green",
+   "layer": "top",
+   "sheet": "avatars/top/jacket-green.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "jacket-yellow",
+   "layer": "top",
+   "sheet": "avatars/top/jacket-yellow.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "jacket-red",
+   "layer": "top",
+   "sheet": "avatars/top/jacket-red.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "jacket-pink",
+   "layer": "top",
+   "sheet": "avatars/top/jacket-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "jacket-purple",
+   "layer": "top",
+   "sheet": "avatars/top/jacket-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "jacket-white",
+   "layer": "top",
+   "sheet": "avatars/top/jacket-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "jacket-black",
+   "layer": "top",
+   "sheet": "avatars/top/jacket-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dress-blue",
+   "layer": "top",
+   "sheet": "avatars/top/dress-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dress-teal",
+   "layer": "top",
+   "sheet": "avatars/top/dress-teal.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dress-green",
+   "layer": "top",
+   "sheet": "avatars/top/dress-green.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dress-yellow",
+   "layer": "top",
+   "sheet": "avatars/top/dress-yellow.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dress-red",
+   "layer": "top",
+   "sheet": "avatars/top/dress-red.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dress-pink",
+   "layer": "top",
+   "sheet": "avatars/top/dress-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dress-purple",
+   "layer": "top",
+   "sheet": "avatars/top/dress-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dress-white",
+   "layer": "top",
+   "sheet": "avatars/top/dress-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "dress-black",
+   "layer": "top",
+   "sheet": "avatars/top/dress-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "none",
    "layer": "hair",
-   "sheet": "avatars/hair/brown.png",
-   "label": "Castanho",
-   "color": "#6b4423",
+   "sheet": "avatars/hair/none.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "black",
+   "id": "short-black",
    "layer": "hair",
-   "sheet": "avatars/hair/black.png",
-   "label": "Preto",
-   "color": "#2d2a33",
+   "sheet": "avatars/hair/short-black.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "blonde",
+   "id": "short-black@hat",
    "layer": "hair",
-   "sheet": "avatars/hair/blonde.png",
-   "label": "Loiro",
-   "color": "#e8c35f",
+   "sheet": "avatars/hair/short-black@hat.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "red",
+   "id": "short-brown",
    "layer": "hair",
-   "sheet": "avatars/hair/red.png",
-   "label": "Ruivo",
-   "color": "#c24a2e",
+   "sheet": "avatars/hair/short-brown.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   },
   {
-   "id": "blue",
+   "id": "short-brown@hat",
    "layer": "hair",
-   "sheet": "avatars/hair/blue.png",
-   "label": "Azul",
-   "color": "#4a79d9",
+   "sheet": "avatars/hair/short-brown@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-auburn",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-auburn.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-auburn@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-auburn@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-blonde",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-blonde.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-blonde@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-blonde@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-platinum",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-platinum.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-platinum@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-platinum@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-pink",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-pink@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-pink@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-blue",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "short-blue@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/short-blue@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-black",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-black@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-black@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-brown",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-brown.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-brown@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-brown@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-auburn",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-auburn.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-auburn@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-auburn@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-blonde",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-blonde.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-blonde@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-blonde@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-platinum",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-platinum.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-platinum@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-platinum@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-pink",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-pink@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-pink@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-blue",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "spiky-blue@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/spiky-blue@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-black",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-black@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-black@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-brown",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-brown.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-brown@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-brown@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-auburn",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-auburn.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-auburn@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-auburn@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-blonde",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-blonde.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-blonde@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-blonde@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-platinum",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-platinum.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-platinum@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-platinum@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-pink",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-pink@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-pink@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-blue",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "buzz-blue@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/buzz-blue@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-black",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-black@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-black@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-brown",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-brown.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-brown@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-brown@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-auburn",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-auburn.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-auburn@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-auburn@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-blonde",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-blonde.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-blonde@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-blonde@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-platinum",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-platinum.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-platinum@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-platinum@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-pink",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-pink@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-pink@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-blue",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "curly-blue@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/curly-blue@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-black",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-black@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-black@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-brown",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-brown.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-brown@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-brown@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-auburn",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-auburn.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-auburn@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-auburn@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-blonde",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-blonde.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-blonde@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-blonde@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-platinum",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-platinum.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-platinum@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-platinum@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-pink",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-pink@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-pink@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-blue",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bob-blue@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bob-blue@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-black",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-black@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-black@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-brown",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-brown.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-brown@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-brown@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-auburn",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-auburn.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-auburn@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-auburn@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-blonde",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-blonde.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-blonde@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-blonde@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-platinum",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-platinum.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-platinum@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-platinum@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-pink",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-pink@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-pink@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-blue",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "long-blue@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/long-blue@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-black",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-black@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-black@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-brown",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-brown.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-brown@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-brown@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-auburn",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-auburn.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-auburn@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-auburn@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-blonde",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-blonde.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-blonde@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-blonde@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-platinum",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-platinum.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-platinum@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-platinum@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-pink",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-pink@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-pink@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-blue",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "ponytail-blue@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/ponytail-blue@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-black",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-black@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-black@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-brown",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-brown.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-brown@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-brown@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-auburn",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-auburn.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-auburn@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-auburn@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-blonde",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-blonde.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-blonde@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-blonde@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-platinum",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-platinum.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-platinum@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-platinum@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-pink",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-pink@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-pink@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-blue",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bun-blue@hat",
+   "layer": "hair",
+   "sheet": "avatars/hair/bun-blue@hat.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "none",
+   "layer": "bag",
+   "sheet": "avatars/bag/none.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "backpack-blue",
+   "layer": "bag",
+   "sheet": "avatars/bag/backpack-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "backpack-teal",
+   "layer": "bag",
+   "sheet": "avatars/bag/backpack-teal.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "backpack-green",
+   "layer": "bag",
+   "sheet": "avatars/bag/backpack-green.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "backpack-yellow",
+   "layer": "bag",
+   "sheet": "avatars/bag/backpack-yellow.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "backpack-red",
+   "layer": "bag",
+   "sheet": "avatars/bag/backpack-red.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "backpack-pink",
+   "layer": "bag",
+   "sheet": "avatars/bag/backpack-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "backpack-purple",
+   "layer": "bag",
+   "sheet": "avatars/bag/backpack-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "backpack-white",
+   "layer": "bag",
+   "sheet": "avatars/bag/backpack-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "backpack-black",
+   "layer": "bag",
+   "sheet": "avatars/bag/backpack-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "satchel-blue",
+   "layer": "bag",
+   "sheet": "avatars/bag/satchel-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "satchel-teal",
+   "layer": "bag",
+   "sheet": "avatars/bag/satchel-teal.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "satchel-green",
+   "layer": "bag",
+   "sheet": "avatars/bag/satchel-green.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "satchel-yellow",
+   "layer": "bag",
+   "sheet": "avatars/bag/satchel-yellow.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "satchel-red",
+   "layer": "bag",
+   "sheet": "avatars/bag/satchel-red.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "satchel-pink",
+   "layer": "bag",
+   "sheet": "avatars/bag/satchel-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "satchel-purple",
+   "layer": "bag",
+   "sheet": "avatars/bag/satchel-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "satchel-white",
+   "layer": "bag",
+   "sheet": "avatars/bag/satchel-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "satchel-black",
+   "layer": "bag",
+   "sheet": "avatars/bag/satchel-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "none",
+   "layer": "hat",
+   "sheet": "avatars/hat/none.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "cap-blue",
+   "layer": "hat",
+   "sheet": "avatars/hat/cap-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "cap-teal",
+   "layer": "hat",
+   "sheet": "avatars/hat/cap-teal.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "cap-green",
+   "layer": "hat",
+   "sheet": "avatars/hat/cap-green.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "cap-yellow",
+   "layer": "hat",
+   "sheet": "avatars/hat/cap-yellow.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "cap-red",
+   "layer": "hat",
+   "sheet": "avatars/hat/cap-red.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "cap-pink",
+   "layer": "hat",
+   "sheet": "avatars/hat/cap-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "cap-purple",
+   "layer": "hat",
+   "sheet": "avatars/hat/cap-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "cap-white",
+   "layer": "hat",
+   "sheet": "avatars/hat/cap-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "cap-black",
+   "layer": "hat",
+   "sheet": "avatars/hat/cap-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "beanie-blue",
+   "layer": "hat",
+   "sheet": "avatars/hat/beanie-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "beanie-teal",
+   "layer": "hat",
+   "sheet": "avatars/hat/beanie-teal.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "beanie-green",
+   "layer": "hat",
+   "sheet": "avatars/hat/beanie-green.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "beanie-yellow",
+   "layer": "hat",
+   "sheet": "avatars/hat/beanie-yellow.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "beanie-red",
+   "layer": "hat",
+   "sheet": "avatars/hat/beanie-red.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "beanie-pink",
+   "layer": "hat",
+   "sheet": "avatars/hat/beanie-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "beanie-purple",
+   "layer": "hat",
+   "sheet": "avatars/hat/beanie-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "beanie-white",
+   "layer": "hat",
+   "sheet": "avatars/hat/beanie-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "beanie-black",
+   "layer": "hat",
+   "sheet": "avatars/hat/beanie-black.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bucket-blue",
+   "layer": "hat",
+   "sheet": "avatars/hat/bucket-blue.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bucket-teal",
+   "layer": "hat",
+   "sheet": "avatars/hat/bucket-teal.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bucket-green",
+   "layer": "hat",
+   "sheet": "avatars/hat/bucket-green.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bucket-yellow",
+   "layer": "hat",
+   "sheet": "avatars/hat/bucket-yellow.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bucket-red",
+   "layer": "hat",
+   "sheet": "avatars/hat/bucket-red.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bucket-pink",
+   "layer": "hat",
+   "sheet": "avatars/hat/bucket-pink.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bucket-purple",
+   "layer": "hat",
+   "sheet": "avatars/hat/bucket-purple.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bucket-white",
+   "layer": "hat",
+   "sheet": "avatars/hat/bucket-white.png",
+   "license": "CC0",
+   "author": "PixelRooms (gerado por cmd/genassets)"
+  },
+  {
+   "id": "bucket-black",
+   "layer": "hat",
+   "sheet": "avatars/hat/bucket-black.png",
    "license": "CC0",
    "author": "PixelRooms (gerado por cmd/genassets)"
   }
- ]
+ ],
+ "layers": [
+  "body",
+  "bottom",
+  "top",
+  "bag",
+  "hair",
+  "hat"
+ ],
+ "sheetLayout": "frames 32×32 de arte (64×64 no PNG, 2×); 6 colunas × 4 linhas (parado, piscando, passo A, meio A, passo B, meio B; linhas: down, up, left, right)"
 }

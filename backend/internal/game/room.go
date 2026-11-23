@@ -40,6 +40,12 @@ type chatIntent struct {
 	text     string
 }
 
+type profileIntent struct {
+	playerID string
+	name     string
+	avatar   *protocol.Avatar
+}
+
 type emoteIntent struct {
 	playerID string
 	emote    string
@@ -59,6 +65,7 @@ type Room struct {
 	moveCh  chan moveIntent
 	chatCh  chan chatIntent
 	emoteCh chan emoteIntent
+	profCh  chan profileIntent
 	stopCh  chan struct{}
 
 	tick      uint64
@@ -76,6 +83,7 @@ func NewRoom(id string, world *maps.Compiled, minter MediaTokenMinter) *Room {
 		moveCh:  make(chan moveIntent, 256),
 		chatCh:  make(chan chatIntent, 64),
 		emoteCh: make(chan emoteIntent, 64),
+		profCh:  make(chan profileIntent, 16),
 		stopCh:  make(chan struct{}),
 	}
 	go r.run()
@@ -121,6 +129,15 @@ func (r *Room) Emote(playerID, emote string) {
 	}
 }
 
+// UpdateProfile troca nome e avatar de um jogador já na sala (menu de
+// configurações). name já vem sanitizado; avatar é validado na sala.
+func (r *Room) UpdateProfile(playerID, name string, avatar *protocol.Avatar) {
+	select {
+	case r.profCh <- profileIntent{playerID: playerID, name: name, avatar: avatar}:
+	default:
+	}
+}
+
 // Leave remove o jogador da sala.
 func (r *Room) Leave(playerID string) {
 	select {
@@ -150,14 +167,74 @@ func (r *Room) run() {
 			r.handleChat(in)
 		case in := <-r.emoteCh:
 			r.handleEmote(in)
+		case in := <-r.profCh:
+			r.handleProfile(in)
 		case <-ticker.C:
 			r.flushTick()
 		}
 	}
 }
 
+// pickSpawn escolhe onde um novo jogador aparece, sem nascer em cima nem
+// colado em outra pessoa (avatares e nomes sobrepostos): procura, a partir
+// de um spawn aleatório (BFS pelos tiles andáveis), o primeiro tile sem
+// ninguém num raio de 1; se não houver, o primeiro tile só desocupado.
+// Spawns têm preferência sobre os tiles vizinhos.
+func (r *Room) pickSpawn() maps.Point {
+	occupied := make(map[maps.Point]bool, len(r.players))
+	for _, p := range r.players {
+		occupied[maps.Point{X: p.X, Y: p.Y}] = true
+	}
+	crowded := func(pt maps.Point) bool {
+		for dx := -1; dx <= 1; dx++ {
+			for dy := -1; dy <= 1; dy++ {
+				if occupied[maps.Point{X: pt.X + dx, Y: pt.Y + dy}] {
+					return true
+				}
+			}
+		}
+		return false
+	}
+	spawns := r.world.Spawns
+	order := rand.Perm(len(spawns))
+	for _, i := range order {
+		if !crowded(spawns[i]) {
+			return spawns[i]
+		}
+	}
+
+	start := spawns[order[0]]
+	var firstFree *maps.Point
+	seen := map[maps.Point]bool{start: true}
+	queue := []maps.Point{start}
+	for steps := 0; len(queue) > 0 && steps < 4096; steps++ {
+		cur := queue[0]
+		queue = queue[1:]
+		if _, portal := r.world.PortalAt(cur.X, cur.Y); !portal && r.world.Walkable(cur.X, cur.Y) && !occupied[cur] {
+			if !crowded(cur) {
+				return cur
+			}
+			if firstFree == nil {
+				c := cur
+				firstFree = &c
+			}
+		}
+		for _, d := range [][2]int{{1, 0}, {-1, 0}, {0, 1}, {0, -1}} {
+			n := maps.Point{X: cur.X + d[0], Y: cur.Y + d[1]}
+			if !seen[n] && r.world.Walkable(n.X, n.Y) {
+				seen[n] = true
+				queue = append(queue, n)
+			}
+		}
+	}
+	if firstFree != nil {
+		return *firstFree
+	}
+	return start // mapa lotado: empilha no spawn
+}
+
 func (r *Room) handleJoin(req joinRequest) {
-	spawn := r.world.Spawns[rand.IntN(len(r.world.Spawns))]
+	spawn := r.pickSpawn()
 	p := &Player{
 		ID:     newPlayerID(),
 		Name:   req.name,

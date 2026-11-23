@@ -3,6 +3,7 @@ import { create } from "zustand";
 interface MediaUIState {
   micOn: boolean;
   camOn: boolean;
+  screenOn: boolean; // compartilhando a própria tela
   connected: boolean; // conectado ao SFU
   hear: string[]; // ids que o servidor mandou ouvir/ver
   areaId: string; // área privada atual ("" = fora)
@@ -15,6 +16,7 @@ interface MediaUIState {
 export const useMediaStore = create<MediaUIState>(() => ({
   micOn: true,
   camOn: true,
+  screenOn: false,
   connected: false,
   hear: [],
   areaId: "",

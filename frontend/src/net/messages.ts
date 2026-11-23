@@ -8,8 +8,13 @@ export type ChatScope = "nearby" | "map";
 /** Escolha de camadas do avatar (ids do manifesto de avatares). */
 export interface AvatarConfig {
   body: string;
-  hair: string;
+  bottom: string;
   top: string;
+  hair: string;
+  /** Acessório de cabeça ("none" = sem). */
+  hat: string;
+  /** Mochila/bolsa ("none" = sem). */
+  bag: string;
 }
 
 export interface PlayerState {
@@ -59,6 +64,7 @@ export type ServerMessage =
   | ({ type: "join_ack" } & JoinAck)
   | { type: "player_joined"; player: PlayerState }
   | { type: "player_left"; playerId: string }
+  | { type: "player_updated"; player: PlayerState }
   | { type: "movement"; tick: number; moves: Move[] }
   | { type: "teleport"; playerId: string; x: number; y: number }
   | ({ type: "media" } & MediaState)
@@ -72,4 +78,5 @@ export type ClientMessage =
   | { type: "move"; dir: Direction }
   | { type: "chat"; scope: ChatScope; text: string }
   | { type: "emote"; emote: EmoteId }
+  | { type: "profile"; name?: string; avatar?: AvatarConfig }
   | { type: "ping"; t: number };

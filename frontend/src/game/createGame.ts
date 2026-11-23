@@ -3,7 +3,7 @@ import { BootScene } from "./scenes/BootScene";
 import { WorldScene } from "./scenes/WorldScene";
 
 export function createGame(parent: HTMLElement): Phaser.Game {
-  return new Phaser.Game({
+  const game = new Phaser.Game({
     type: Phaser.AUTO,
     parent,
     backgroundColor: "#1a1b26",
@@ -15,4 +15,7 @@ export function createGame(parent: HTMLElement): Phaser.Game {
     },
     scene: [BootScene, WorldScene],
   });
+  // Só em dev: permite inspecionar a cena no console e em testes headless.
+  if (import.meta.env.DEV) Object.assign(window, { game });
+  return game;
 }

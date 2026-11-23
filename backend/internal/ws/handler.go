@@ -69,6 +69,12 @@ func Handler(mgr *game.Manager) http.HandlerFunc {
 				room.Chat(player.ID, msg.Scope, msg.Text)
 			case protocol.CEmote:
 				room.Emote(player.ID, msg.Emote)
+			case protocol.CProfile:
+				name := ""
+				if strings.TrimSpace(msg.Name) != "" {
+					name = sanitizeName(msg.Name)
+				}
+				room.UpdateProfile(player.ID, name, msg.Avatar)
 			case protocol.CPing:
 				c.Send(protocol.Marshal(protocol.ServerMessage{
 					Type:       protocol.SPong,

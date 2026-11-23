@@ -42,11 +42,9 @@ func main() {
 		}},
 	})
 
-	manifest := avatarManifest()
-	for _, item := range manifest.Items {
-		writePNG(filepath.Join(*out, item.Sheet), avatarSheet(item.Layer, item.ID))
-	}
-	writeJSON(filepath.Join(*out, "avatars", "manifest.json"), manifest)
+	writeAvatars(*out)
+	writeEmotes(*out)
+	writeWorld(*out)
 
 	writePNG(filepath.Join(*out, "objects", "poster-pixelrooms.png"), posterImage())
 	writeJSON(filepath.Join(*out, "objects", "manifest.json"), map[string]any{
@@ -58,60 +56,6 @@ func main() {
 
 	writeJSON(filepath.Join(*out, "maps", "templates", "lobby.tmj"), lobbyMap(gids, len(tiles)))
 	log.Println("assets gerados em", *out)
-}
-
-// ── Manifesto do avatar ───────────────────────────────────────────
-
-type avatarItem struct {
-	ID      string `json:"id"`
-	Layer   string `json:"layer"`
-	Sheet   string `json:"sheet"`
-	Label   string `json:"label"`
-	Color   string `json:"color"`
-	License string `json:"license"`
-	Author  string `json:"author"`
-}
-
-type avatarManifestT struct {
-	FrameSize   map[string]int `json:"frameSize"`
-	SheetLayout string         `json:"sheetLayout"`
-	Layers      []string       `json:"layers"`
-	Items       []avatarItem   `json:"items"`
-}
-
-// Ordem estável para o manifesto e para o seletor na UI (espelhada em
-// backend/internal/game/avatar.go e frontend/src/game/avatarCatalog.ts).
-var (
-	skinOrder = []string{"light", "medium", "dark"}
-	hairOrder = []string{"brown", "black", "blonde", "red", "blue"}
-	topOrder  = []string{"blue", "green", "red", "yellow", "purple", "white"}
-	labels    = map[string]string{
-		"light": "Clara", "medium": "Média", "dark": "Escura",
-		"brown": "Castanho", "black": "Preto", "blonde": "Loiro", "red": "Ruivo", "blue": "Azul",
-		"green": "Verde", "yellow": "Amarelo", "purple": "Roxo", "white": "Branco",
-	}
-)
-
-func avatarManifest() avatarManifestT {
-	m := avatarManifestT{
-		FrameSize:   map[string]int{"w": 32, "h": 64},
-		SheetLayout: "6 colunas × 5 linhas (idle×2, walk×4; linhas: down, up, left, right, sit)",
-		Layers:      []string{"body", "top", "hair"},
-	}
-	add := func(layer string, ids []string, key rune) {
-		for _, id := range ids {
-			c := avatarPalette(layer, id)[key]
-			m.Items = append(m.Items, avatarItem{
-				ID: id, Layer: layer, Sheet: "avatars/" + layer + "/" + id + ".png",
-				Label: labels[id], Color: hexColor(c),
-				License: "CC0", Author: "PixelRooms (gerado por cmd/genassets)",
-			})
-		}
-	}
-	add("body", skinOrder, 'S')
-	add("top", topOrder, 'T')
-	add("hair", hairOrder, 'H')
-	return m
 }
 
 // ── Pôster (objeto "image") ─────────────────────────────────────
@@ -142,8 +86,8 @@ func posterImage() *image.RGBA {
 // ── Mapa lobby ───────────────────────────────────────────────────
 
 const (
-	lobbyW = 30
-	lobbyH = 20
+	lobbyW = 44
+	lobbyH = 28
 )
 
 // Sala de reunião (área privada): perímetro de parede com porta em (25,12);
@@ -183,12 +127,34 @@ var interactables = []interactable{
 	{x: 19, y: 0, w: 2, tiles: []string{"tv_l", "tv_r"}, id: "tv-lobby", typ: "video",
 		title: "TV do lobby", url: "https://www.youtube.com/embed/jfKfPfyJRdk", rng: 1},
 	{x: 4, y: 0, w: 1, tiles: []string{"board"}, id: "mural", typ: "note", title: "Mural de avisos",
-		text: "Bem-vindo ao PixelRooms!\n\n• Ande com WASD/setas ou clique no chão.\n• Chegue perto de alguém para abrir vídeo e áudio.\n• A sala roxa à direita é uma área privada.\n• Suba no palco vermelho para falar com o mapa inteiro.\n• Aperte X perto de objetos para interagir, 1–6 para emotes e ? para os atalhos.", rng: 1},
+		text: "Boas-vindas ao PixelRooms!\n\n• Ande com WASD/setas ou clique no chão.\n• Chegue perto de alguém para abrir vídeo e áudio.\n• A sala roxa à direita é uma área privada.\n• Suba no palco vermelho para falar com o mapa inteiro.\n• Aperte X perto de objetos para interagir, 1–6 para emotes e ? para os atalhos.", rng: 1},
 	{x: 24, y: 12, w: 1, tiles: []string{"poster"}, id: "poster", typ: "image", title: "Pôster",
 		url: "/assets/objects/poster-pixelrooms.png", rng: 1},
 	{x: 26, y: 0, w: 1, tiles: []string{"board"}, id: "link-tiled", typ: "link",
 		title: "Editor de mapas (Tiled)", url: "https://www.mapeditor.org/", rng: 1},
+	{x: 35, y: 0, w: 2, tiles: []string{"whiteboard_l", "whiteboard_r"}, id: "quadro-time", typ: "iframe",
+		title: "Quadro do time", url: "https://excalidraw.com/", rng: 1},
+	{x: 40, y: 0, w: 1, tiles: []string{"board"}, id: "mural-escritorio", typ: "note", title: "Escritório aberto",
+		text: "Escritório aberto\n\n16 estações de trabalho: sente numa cadeira para trabalhar perto do time.\nChegue perto de alguém para conversar por vídeo — ou fique longe para focar.", rng: 1},
 }
+
+// Estações de trabalho: mesa 2×1 (monitor + caneca) com a cadeira embaixo
+// do monitor. Escritório original (noroeste), escritório aberto (leste) e
+// área de foco (sul): 4 + 16 + 8 = 28 estações.
+var workstations = func() [][2]int {
+	ws := [][2]int{{3, 4}, {6, 4}, {3, 8}, {6, 8}}
+	for _, y := range []int{3, 7, 11, 15} {
+		for _, x := range []int{31, 34, 37, 40} {
+			ws = append(ws, [2]int{x, y})
+		}
+	}
+	for _, y := range []int{21, 24} {
+		for _, x := range []int{11, 14, 17, 20} {
+			ws = append(ws, [2]int{x, y})
+		}
+	}
+	return ws
+}()
 
 type lobbyBuilder struct {
 	gids                   map[string]int
@@ -260,7 +226,7 @@ func lobbyMap(gids map[string]int, tileCount int) map[string]any {
 					name = "grass_b"
 				}
 			}
-			if x >= 21 && x <= 28 && y >= 1 && y <= 6 {
+			if (x >= 21 && x <= 28 && y >= 1 && y <= 6) || (x >= 30 && x <= 42 && y >= 1 && y <= 18) {
 				name = "floor_tile"
 				if (x+y)%3 == 0 {
 					name = "floor_tile_b"
@@ -300,12 +266,12 @@ func lobbyMap(gids map[string]int, tileCount int) map[string]any {
 		b.block(roomX1, y, "wall_top")
 	}
 
-	// Escritório (noroeste): mesas 2×1 com cadeiras (cadeira é transitável:
+	// Estações de trabalho: mesas 2×1 com cadeiras (cadeira é transitável:
 	// pisar nela = sentar).
-	for _, d := range [][2]int{{3, 4}, {6, 4}, {3, 8}, {6, 8}} {
+	for _, d := range workstations {
 		b.block(d[0], d[1], "desk_l")
 		b.block(d[0]+1, d[1], "desk_r")
-		b.put(b.objects, d[0], d[1]+1, "chair")
+		b.put(b.objects, d[0], d[1]+1, "chair_up") // de costas: senta de frente para o monitor
 	}
 	// Estante alta: base bloqueia, topo vai na camada Above (sobre a parede).
 	b.block(10, 1, "bookshelf_bot")
@@ -325,7 +291,22 @@ func lobbyMap(gids map[string]int, tileCount int) map[string]any {
 	b.block(20, 14, "plant")
 	b.block(4, 15, "table")
 	b.put(b.objects, 4, 16, "chair")
-	for _, p := range [][2]int{{1, 1}, {12, 7}, {17, 7}, {2, 14}, {7, 17}, {28, 18}} {
+	// Área de foco (sul): tapete teal sob as mesas, estantes e plantas.
+	b.rug("rug_teal", 10, 20, 22, 26)
+	b.block(9, 20, "bookshelf_bot")
+	b.put(b.above, 9, 19, "bookshelf_top")
+	b.block(24, 20, "bookshelf_bot")
+	b.put(b.above, 24, 19, "bookshelf_top")
+	// Copa do sul (sudeste): mesas de café e sofá.
+	b.block(30, 22, "couch_l")
+	b.block(31, 22, "couch_r")
+	b.block(30, 24, "table")
+	b.put(b.objects, 30, 25, "chair")
+	b.block(35, 24, "table")
+	b.put(b.objects, 35, 25, "chair")
+	b.block(41, 21, "cooler")
+	for _, p := range [][2]int{{1, 1}, {12, 7}, {17, 7}, {2, 14}, {7, 17}, {28, 18}, {30, 1}, {42, 1}, {42, 18}, {30, 18},
+		{1, 26}, {26, 26}, {42, 26}, {38, 21}} {
 		b.block(p[0], p[1], "plant")
 	}
 

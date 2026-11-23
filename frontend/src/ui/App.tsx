@@ -1,55 +1,46 @@
-import { useEffect, useRef, useState } from "react";
-import { DEFAULT_AVATAR, normalizeAvatar } from "../game/avatarCatalog";
+import {
+  ExternalLink,
+  Image as ImageIcon,
+  LayoutDashboard,
+  StickyNote,
+  Tv,
+  Users,
+  WifiOff,
+  type LucideIcon,
+} from "lucide-react";
+import { useEffect, useRef } from "react";
 import { EMOTES } from "../game/constants";
 import { createGame } from "../game/createGame";
 import { mediaManager } from "../media/manager";
 import { client } from "../net/client";
-import type { AvatarConfig } from "../net/messages";
-import { bindGameStore, useGameStore } from "../state/gameStore";
+import { bindGameStore, useGameStore, type NearbyObject } from "../state/gameStore";
 import { useMediaStore } from "../state/mediaStore";
+import { motionReduced, prefs, usePrefs } from "../state/prefsStore";
 import { ui, useUIStore } from "../state/uiStore";
-import { AvatarPicker } from "./AvatarPicker";
 import { ChatPanel } from "./ChatPanel";
-import { ControlsBar } from "./ControlsBar";
+import { ControlsBar, ZoomControl } from "./ControlsBar";
 import { HelpModal } from "./HelpModal";
+import { IntroScreen } from "./IntroScreen";
+import { Kbd, Logo, Tooltip } from "./kit";
 import { ObjectModal } from "./ObjectModal";
 import { ParticipantsPanel } from "./ParticipantsPanel";
+import { ScreenShareStage } from "./ScreenShareStage";
+import { SettingsModal } from "./SettingsModal";
+import { Tutorial } from "./Tutorial";
 import { VideoGrid } from "./VideoGrid";
 
 bindGameStore(() => useUIStore.getState().chatOpen);
 mediaManager.bind();
 
-const PROFILE_KEY = "pixelrooms.profile";
-
-interface Profile {
-  name: string;
-  avatar: AvatarConfig;
-}
-
-function loadProfile(): Profile {
-  try {
-    const raw = localStorage.getItem(PROFILE_KEY);
-    if (raw) {
-      const p = JSON.parse(raw) as Partial<Profile>;
-      return { name: typeof p.name === "string" ? p.name : "", avatar: normalizeAvatar(p.avatar) };
-    }
-  } catch {
-    // storage indisponível ou corrompido: usa o padrão
-  }
-  return { name: "", avatar: DEFAULT_AVATAR };
-}
-
-function saveProfile(p: Profile) {
-  try {
-    localStorage.setItem(PROFILE_KEY, JSON.stringify(p));
-  } catch {
-    // ignorar (modo privado etc.)
-  }
-}
-
 export function App() {
   const gameRoot = useRef<HTMLDivElement>(null);
   const status = useGameStore((s) => s.status);
+  const motion = usePrefs((s) => s.motion);
+
+  // "Reduzir movimento" do app também desliga as animações CSS.
+  useEffect(() => {
+    document.documentElement.dataset.motion = motionReduced() ? "reduce" : "full";
+  }, [motion]);
 
   useEffect(() => {
     if (!gameRoot.current) return;
@@ -58,103 +49,9 @@ export function App() {
   }, []);
 
   return (
-    <div className="relative h-full w-full">
+    <div className="relative h-full w-full select-none">
       <div ref={gameRoot} className="absolute inset-0" />
-      {status === "connected" || status === "reconnecting" ? <Hud /> : <JoinOverlay />}
-    </div>
-  );
-}
-
-function JoinOverlay() {
-  const status = useGameStore((s) => s.status);
-  const [profile, setProfile] = useState<Profile>(loadProfile);
-
-  const join = () => {
-    if (status === "connecting") return;
-    const name = profile.name.trim() || "Convidado";
-    saveProfile({ ...profile, name });
-    client.connect(name, profile.avatar);
-  };
-
-  return (
-    <div className="absolute inset-0 flex items-center justify-center overflow-y-auto bg-black/60 p-4">
-      <div className="w-[26rem] max-w-full rounded-xl bg-slate-800 p-6 shadow-2xl">
-        <h1 className="mb-1 text-center font-mono text-2xl font-bold text-white">PixelRooms</h1>
-        <p className="mb-4 text-center text-sm text-slate-400">
-          Monte seu avatar, teste a câmera e entre no lobby
-        </p>
-        <AvatarPicker value={profile.avatar} onChange={(avatar) => setProfile({ ...profile, avatar })} />
-        <DeviceTest />
-        <input
-          autoFocus
-          maxLength={24}
-          value={profile.name}
-          onChange={(e) => setProfile({ ...profile, name: e.target.value })}
-          onKeyDown={(e) => e.key === "Enter" && join()}
-          placeholder="Seu nome"
-          aria-label="Seu nome"
-          className="mb-3 w-full rounded-md bg-slate-700 px-3 py-2 text-white placeholder-slate-400 outline-none focus:ring-2 focus:ring-emerald-500"
-        />
-        <button
-          onClick={join}
-          disabled={status === "connecting"}
-          className="w-full rounded-md bg-emerald-600 py-2 font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-50"
-        >
-          {status === "connecting" ? "Conectando…" : "Entrar"}
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/**
- * Teste de câmera/microfone antes de entrar (RF-RTC-07): preview local e
- * escolha do estado inicial de mic/câmera, que o MediaManager respeita ao
- * conectar no SFU.
- */
-function DeviceTest() {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const [error, setError] = useState(false);
-  const micOn = useMediaStore((s) => s.micOn);
-  const camOn = useMediaStore((s) => s.camOn);
-
-  useEffect(() => {
-    let stream: MediaStream | null = null;
-    navigator.mediaDevices
-      ?.getUserMedia({ video: true, audio: true })
-      .then((s) => {
-        stream = s;
-        if (videoRef.current) videoRef.current.srcObject = s;
-      })
-      .catch(() => setError(true));
-    return () => stream?.getTracks().forEach((t) => t.stop());
-  }, []);
-
-  return (
-    <div className="mb-4">
-      <div className="relative h-36 w-full overflow-hidden rounded-lg bg-slate-900">
-        {error || !camOn ? (
-          <div className="flex h-full items-center justify-center text-sm text-slate-500">
-            {error ? "câmera/microfone indisponíveis" : "câmera desligada"}
-          </div>
-        ) : (
-          <video ref={videoRef} autoPlay muted playsInline className="h-full w-full -scale-x-100 object-cover" />
-        )}
-      </div>
-      <div className="mt-2 flex justify-center gap-2">
-        <button
-          onClick={() => useMediaStore.setState({ micOn: !micOn })}
-          className={`rounded px-3 py-1 text-sm text-white ${micOn ? "bg-slate-600" : "bg-red-600"}`}
-        >
-          {micOn ? "🎙️ mic ligado" : "🔇 mic desligado"}
-        </button>
-        <button
-          onClick={() => useMediaStore.setState({ camOn: !camOn })}
-          className={`rounded px-3 py-1 text-sm text-white ${camOn ? "bg-slate-600" : "bg-red-600"}`}
-        >
-          {camOn ? "📷 cam ligada" : "🚫 cam desligada"}
-        </button>
-      </div>
+      {status === "connected" || status === "reconnecting" ? <Hud /> : <IntroScreen />}
     </div>
   );
 }
@@ -172,45 +69,84 @@ function useHotkeys() {
         else ui.closeTop();
         return;
       }
-      if (typing || e.ctrlKey || e.metaKey || e.altKey) return;
+      if (typing || e.ctrlKey || e.metaKey || e.altKey || e.repeat) return;
 
+      // Toda tecla tratada aqui chama preventDefault: sem isso, abrir o
+      // chat com "C" movia o foco para o campo e o "c" era digitado nele.
+      const handled = () => e.preventDefault();
       const emoteIndex = "123456".indexOf(e.key);
       if (emoteIndex >= 0) {
+        handled();
         client.emote(EMOTES[emoteIndex].id);
         return;
       }
       switch (e.key) {
         case "0":
+          handled();
           client.emote("clear");
           break;
         case "x":
         case "X": {
           const obj = useGameStore.getState().nearbyObject;
-          if (obj) ui.openObject(obj);
+          if (obj) {
+            handled();
+            ui.openObject(obj);
+          }
           break;
         }
         case "Enter":
-          e.preventDefault();
+          handled();
           ui.openChat();
           break;
         case "c":
         case "C":
+          handled();
           ui.toggleChat();
           break;
         case "p":
         case "P":
+          handled();
           ui.toggleParticipants();
           break;
         case "m":
         case "M":
+          handled();
           void mediaManager.setMicOn(!useMediaStore.getState().micOn);
           break;
         case "v":
         case "V":
+          handled();
           void mediaManager.setCamOn(!useMediaStore.getState().camOn);
           break;
+        case "e":
+        case "E":
+          handled();
+          ui.toggleEmotes();
+          break;
         case "?":
+          handled();
           ui.toggleHelp();
+          break;
+        case "t":
+        case "T":
+          if (useMediaStore.getState().connected) {
+            handled();
+            void mediaManager.setScreenShare(!useMediaStore.getState().screenOn);
+          }
+          break;
+        case "+":
+        case "=":
+          handled();
+          prefs.zoomBy(1);
+          break;
+        case "-":
+        case "_":
+          handled();
+          prefs.zoomBy(-1);
+          break;
+        case ",":
+          handled();
+          ui.toggleSettings();
           break;
       }
     };
@@ -221,50 +157,107 @@ function useHotkeys() {
 
 function Hud() {
   useHotkeys();
-  const status = useGameStore((s) => s.status);
-  const count = useGameStore((s) => Object.keys(s.players).length);
-  const mapId = useGameStore((s) => s.mapId);
-  const nearby = useGameStore((s) => s.nearbyObject);
   const chatOpen = useUIStore((s) => s.chatOpen);
   const participantsOpen = useUIStore((s) => s.participantsOpen);
   const helpOpen = useUIStore((s) => s.helpOpen);
   const openObject = useUIStore((s) => s.openObject);
+  const settingsOpen = useUIStore((s) => s.settingsOpen);
+  const tutorialOpen = useUIStore((s) => s.tutorialOpen);
+
+  // Tutorial na primeira vez que a pessoa entra (depois, pelas configurações).
+  useEffect(() => {
+    if (!usePrefs.getState().tutorialDone) ui.openTutorial();
+  }, []);
 
   return (
-    <>
+    <div className="pointer-events-none absolute inset-0">
+      <TopBar />
       <VideoGrid />
+      <ScreenShareStage />
       <ControlsBar />
+      <ZoomControl />
+      <InteractPrompt />
       {chatOpen && <ChatPanel />}
       {participantsOpen && <ParticipantsPanel />}
       {helpOpen && <HelpModal />}
+      {settingsOpen && <SettingsModal />}
       {openObject && <ObjectModal obj={openObject} />}
+      {tutorialOpen && <Tutorial />}
+    </div>
+  );
+}
 
-      <header className="pointer-events-none absolute top-0 left-0 flex w-full items-start justify-between p-3 text-sm text-white/90">
-        <span className="rounded bg-black/50 px-3 py-1 font-mono font-semibold">
-          PixelRooms <span className="font-normal text-white/50">· {mapId}</span>
-        </span>
-        {status === "reconnecting" && (
-          <span className="rounded bg-amber-600/80 px-3 py-1">reconectando…</span>
-        )}
-        <button
-          onClick={ui.toggleParticipants}
-          className="pointer-events-auto rounded bg-black/50 px-3 py-1 hover:bg-black/70"
-          title="Participantes (P)"
-        >
-          👥 {count} online
-        </button>
-      </header>
+function TopBar() {
+  const status = useGameStore((s) => s.status);
+  const count = useGameStore((s) => Object.keys(s.players).length);
+  const mapId = useGameStore((s) => s.mapId);
+  const mediaConnected = useMediaStore((s) => s.connected);
 
-      {nearby && !openObject && (
-        <div className="pointer-events-none absolute bottom-20 left-1/2 -translate-x-1/2 rounded-lg bg-yellow-400 px-3 py-1.5 text-sm font-semibold text-slate-900 shadow-lg">
-          <kbd className="rounded bg-slate-900/80 px-1.5 py-0.5 font-mono text-xs text-yellow-300">X</kbd>{" "}
-          {nearby.title}
+  return (
+    <header className="absolute top-3 left-3 z-10 flex items-center gap-2">
+      <div className="glass pointer-events-auto flex h-11 items-center gap-3 rounded-2xl pr-1.5 pl-3.5">
+        <Logo />
+        <span className="h-5 w-px bg-white/10" />
+        <span className="text-[13px] font-medium text-ink-200 capitalize">{mapId}</span>
+        <Tooltip label="Pessoas" shortcut="P" side="bottom">
+          <button
+            type="button"
+            onClick={ui.toggleParticipants}
+            className="focus-ring inline-flex h-8 items-center gap-1.5 rounded-xl bg-white/[0.05] px-2.5 text-[13px] font-medium text-ink-100 transition hover:bg-white/10"
+          >
+            <span className="relative flex size-2">
+              <span className="absolute inline-flex size-full animate-ping rounded-full bg-live opacity-60" />
+              <span className="relative inline-flex size-2 rounded-full bg-live" />
+            </span>
+            <Users className="size-3.5 text-ink-300" />
+            {count}
+          </button>
+        </Tooltip>
+      </div>
+      {status === "reconnecting" && (
+        <div className="glass flex h-11 animate-pop-in items-center gap-2 rounded-2xl px-3.5 text-[13px] font-medium text-amber-300">
+          <span className="size-2 animate-pulse rounded-full bg-amber-400" /> Reconectando…
         </div>
       )}
+      {!mediaConnected && status === "connected" && (
+        <Tooltip label="Vídeo e áudio indisponíveis — o SFU não está acessível" side="bottom">
+          <div className="glass pointer-events-auto flex h-11 items-center gap-2 rounded-2xl px-3.5 text-[13px] font-medium text-ink-300">
+            <WifiOff className="size-4" /> Mídia offline
+          </div>
+        </Tooltip>
+      )}
+    </header>
+  );
+}
 
-      <footer className="pointer-events-none absolute bottom-0 left-0 p-3 text-xs text-white/60">
-        <span className="rounded bg-black/50 px-2 py-1">WASD/setas ou clique para andar · ? atalhos</span>
-      </footer>
-    </>
+const OBJECT_ICON: Record<NearbyObject["type"], LucideIcon> = {
+  iframe: LayoutDashboard,
+  video: Tv,
+  image: ImageIcon,
+  note: StickyNote,
+  link: ExternalLink,
+};
+
+/** "Pressione X" ao chegar perto de um objeto interativo. */
+function InteractPrompt() {
+  const nearby = useGameStore((s) => s.nearbyObject);
+  const openObject = useUIStore((s) => s.openObject);
+  if (!nearby || openObject) return null;
+  const Icon = OBJECT_ICON[nearby.type];
+  return (
+    <button
+      key={nearby.objectId}
+      type="button"
+      onClick={() => ui.openObject(nearby)}
+      className="glass pointer-events-auto absolute bottom-[92px] left-1/2 flex -translate-x-1/2 animate-pop-in items-center gap-2.5 rounded-2xl py-2 pr-4 pl-2 text-[13px] text-ink-100 transition hover:bg-ink-800"
+    >
+      <span className="grid size-8 place-items-center rounded-xl bg-amber-300/15 text-amber-300">
+        <Icon className="size-4" />
+      </span>
+      <span className="font-semibold text-white">{nearby.title}</span>
+      <span className="flex items-center gap-1.5 text-ink-400">
+        <Kbd className="border-amber-300/30 bg-amber-300/10 text-amber-200">X</Kbd> interagir
+      </span>
+    </button>
   );
 }

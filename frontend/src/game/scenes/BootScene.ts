@@ -1,6 +1,7 @@
 import Phaser from "phaser";
-import { AVATAR_CATALOG, AVATAR_LAYERS, sheetURL, textureKey } from "../avatarCatalog";
+import { ALL_SHEETS, SHEET, sheetURL, textureKey } from "../avatarCatalog";
 import { TILE_SIZE } from "../constants";
+import { preloadExterior } from "../exterior";
 import { client } from "../../net/client";
 import type { JoinAck } from "../../net/messages";
 
@@ -16,46 +17,47 @@ export class BootScene extends Phaser.Scene {
   preload() {
     this.load.tilemapTiledJSON("lobby", "/assets/maps/templates/lobby.tmj");
     this.load.image("tiles", "/assets/tilesets/basic.png");
-    for (const layer of AVATAR_LAYERS) {
-      for (const item of AVATAR_CATALOG[layer]) {
-        this.load.spritesheet(textureKey(layer, item.id), sheetURL(layer, item.id), {
-          frameWidth: 32,
-          frameHeight: 64,
-        });
-      }
+    preloadExterior(this);
+    this.load.spritesheet("emote-bubbles", "/assets/ui/emote-bubbles.png", { frameWidth: 32, frameHeight: 36 });
+    for (const { layer, id } of ALL_SHEETS) {
+      this.load.spritesheet(textureKey(layer, id), sheetURL(layer, id), {
+        frameWidth: SHEET.frameW,
+        frameHeight: SHEET.frameH,
+      });
     }
   }
 
   create() {
-    this.drawTileGrid();
-    this.scale.on(Phaser.Scale.Events.RESIZE, () => this.drawTileGrid());
+    this.drawBackdrop();
+    this.scale.on(Phaser.Scale.Events.RESIZE, () => this.drawBackdrop());
+
+    // A fonte das etiquetas de nome precisa estar pronta antes do 1º texto.
+    const fontsReady = document.fonts?.ready ?? Promise.resolve();
+    const go = (ack: JoinAck) => void fontsReady.then(() => this.scene.start("world", { ack }));
 
     if (client.lastAck) {
-      this.enterWorld(client.lastAck);
+      go(client.lastAck);
       return;
     }
     const off = client.on("joined", (ack) => {
       off();
-      this.enterWorld(ack);
+      go(ack);
     });
     this.events.once(Phaser.Scenes.Events.SHUTDOWN, off);
   }
 
-  private enterWorld(ack: JoinAck) {
-    this.scene.start("world", { ack });
-  }
+  private backdrop?: Phaser.GameObjects.Graphics;
 
-  private grid?: Phaser.GameObjects.Graphics;
-
-  private drawTileGrid() {
-    this.grid?.destroy();
-    this.grid = this.add.graphics().setDepth(-1);
-
+  /** Fundo atrás da tela de entrada: xadrez discreto em tons da UI. */
+  private drawBackdrop() {
+    this.backdrop?.destroy();
+    this.backdrop = this.add.graphics().setDepth(-1);
     const { width, height } = this.scale;
-    for (let y = 0; y < Math.ceil(height / TILE_SIZE); y++) {
-      for (let x = 0; x < Math.ceil(width / TILE_SIZE); x++) {
-        this.grid.fillStyle((x + y) % 2 === 0 ? 0x1f2335 : 0x24283b);
-        this.grid.fillRect(x * TILE_SIZE, y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+    const s = TILE_SIZE * 2;
+    for (let y = 0; y < Math.ceil(height / s); y++) {
+      for (let x = 0; x < Math.ceil(width / s); x++) {
+        this.backdrop.fillStyle((x + y) % 2 === 0 ? 0x10121b : 0x131622);
+        this.backdrop.fillRect(x * s, y * s, s, s);
       }
     }
   }

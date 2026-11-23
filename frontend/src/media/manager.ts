@@ -10,6 +10,7 @@ import { PROXIMITY_RADIUS } from "../game/constants";
 import { client } from "../net/client";
 import { useGameStore } from "../state/gameStore";
 import { useMediaStore } from "../state/mediaStore";
+import { usePrefs } from "../state/prefsStore";
 import type { MediaState } from "../net/messages";
 
 // Volume 100% até esta distância; decai linearmente até 0 no raio+1 (RF-RTC-02).
@@ -39,6 +40,60 @@ class MediaManager {
     useGameStore.subscribe((s, prev) => {
       if (s.players !== prev.players) this.updateVolumes();
     });
+    usePrefs.subscribe((s, prev) => {
+      if (s.volume !== prev.volume) this.updateVolumes();
+    });
+  }
+
+  /**
+   * Compartilhamento de tela (RF-RTC: screen share). Publica as fontes
+   * ScreenShare (+ ScreenShareAudio, se o navegador oferecer) no SFU; quem
+   * está na sua conversa — ou o mapa todo, se você estiver no palco — vê,
+   * porque o servidor já decide quem assina o quê. Cancelar o seletor do
+   * navegador não é erro.
+   */
+  async setScreenShare(on: boolean) {
+    const room = this.room;
+    if (!room) return;
+    try {
+      await room.localParticipant.setScreenShareEnabled(on, {
+        audio: true,
+        selfBrowserSurface: "exclude",
+        surfaceSwitching: "include",
+        systemAudio: "include",
+      });
+      useMediaStore.setState({ screenOn: on });
+    } catch (err) {
+      if ((err as Error)?.name !== "NotAllowedError") console.error("compartilhamento de tela falhou:", err);
+      useMediaStore.setState({ screenOn: false });
+    } finally {
+      this.bump();
+    }
+  }
+
+  /** Troca o dispositivo de entrada/saída (configurações). */
+  async setDevice(kind: "audioinput" | "videoinput" | "audiooutput", deviceId: string) {
+    const key = kind === "audioinput" ? "micDeviceId" : kind === "videoinput" ? "camDeviceId" : "speakerDeviceId";
+    usePrefs.setState({ [key]: deviceId });
+    try {
+      await this.room?.switchActiveDevice(kind, deviceId || "default");
+    } catch (err) {
+      console.error("falha ao trocar dispositivo:", err);
+    }
+  }
+
+  /** Telas compartilhadas visíveis agora (a própria primeiro). */
+  screenShares(): { id: string; track: Track; local: boolean }[] {
+    const out: { id: string; track: Track; local: boolean }[] = [];
+    const room = this.room;
+    if (!room) return out;
+    const mine = room.localParticipant.getTrackPublication(Track.Source.ScreenShare)?.track;
+    if (mine) out.push({ id: room.localParticipant.identity, track: mine, local: true });
+    for (const p of room.remoteParticipants.values()) {
+      const pub = p.getTrackPublication(Track.Source.ScreenShare);
+      if (pub?.isSubscribed && pub.track) out.push({ id: p.identity, track: pub.track, local: false });
+    }
+    return out;
   }
 
   async setMicOn(on: boolean) {
@@ -58,19 +113,29 @@ class MediaManager {
   }
 
   /** Tracks assinados de um participante remoto + estado do microfone. */
-  remoteTracks(id: string): { video?: RemoteTrack; audio?: RemoteTrack; micMuted: boolean } {
+  remoteTracks(id: string): {
+    video?: RemoteTrack;
+    audio?: RemoteTrack;
+    screenAudio?: RemoteTrack;
+    micMuted: boolean;
+    sharing: boolean;
+  } {
     const p = this.room?.remoteParticipants.get(id);
-    if (!p) return { micMuted: false };
+    if (!p) return { micMuted: false, sharing: false };
     let video: RemoteTrack | undefined;
     let audio: RemoteTrack | undefined;
+    let screenAudio: RemoteTrack | undefined;
     let micMuted = false;
+    let sharing = false;
     for (const pub of p.trackPublications.values()) {
-      if (pub.kind === Track.Kind.Audio && pub.isMuted) micMuted = true;
+      if (pub.source === Track.Source.Microphone && pub.isMuted) micMuted = true;
+      if (pub.source === Track.Source.ScreenShare) sharing = true;
       if (!pub.isSubscribed || !pub.track) continue;
-      if (pub.kind === Track.Kind.Video) video = pub.track;
-      if (pub.kind === Track.Kind.Audio) audio = pub.track;
+      if (pub.source === Track.Source.Camera) video = pub.track;
+      if (pub.source === Track.Source.Microphone) audio = pub.track;
+      if (pub.source === Track.Source.ScreenShareAudio) screenAudio = pub.track;
     }
-    return { video, audio, micMuted };
+    return { video, audio, screenAudio, micMuted, sharing };
   }
 
   private async handleMedia(msg: MediaState) {
@@ -93,7 +158,14 @@ class MediaManager {
 
   private async connect(url: string, token: string) {
     this.connecting = true;
-    const room = new Room({ adaptiveStream: true, dynacast: true });
+    const { micDeviceId, camDeviceId, speakerDeviceId } = usePrefs.getState();
+    const room = new Room({
+      adaptiveStream: true,
+      dynacast: true,
+      audioCaptureDefaults: micDeviceId ? { deviceId: micDeviceId } : undefined,
+      videoCaptureDefaults: camDeviceId ? { deviceId: camDeviceId } : undefined,
+      audioOutput: speakerDeviceId ? { deviceId: speakerDeviceId } : undefined,
+    });
 
     room
       .on(RoomEvent.TrackSubscribed, () => {
@@ -104,6 +176,11 @@ class MediaManager {
       .on(RoomEvent.TrackMuted, () => this.bump())
       .on(RoomEvent.TrackUnmuted, () => this.bump())
       .on(RoomEvent.LocalTrackPublished, () => this.bump())
+      .on(RoomEvent.LocalTrackUnpublished, (pub) => {
+        // "Parar de compartilhar" pela barra do navegador também cai aqui.
+        if (pub.source === Track.Source.ScreenShare) useMediaStore.setState({ screenOn: false });
+        this.bump();
+      })
       .on(RoomEvent.TrackPublished, (_pub, participant) => this.applyFor(participant))
       .on(RoomEvent.ParticipantConnected, (p) => {
         this.applyFor(p);
@@ -115,7 +192,7 @@ class MediaManager {
       })
       .on(RoomEvent.Disconnected, () => {
         this.room = null;
-        useMediaStore.setState({ connected: false, speaking: [] });
+        useMediaStore.setState({ connected: false, speaking: [], screenOn: false });
         this.bump();
       });
 
@@ -141,6 +218,7 @@ class MediaManager {
     this.spotlights.clear();
     useMediaStore.setState({
       connected: false,
+      screenOn: false,
       hear: [],
       areaId: "",
       spotlights: [],
@@ -169,6 +247,7 @@ class MediaManager {
     const { players, selfId } = useGameStore.getState();
     const self = selfId ? players[selfId] : null;
     if (!self) return;
+    const master = usePrefs.getState().volume;
 
     for (const p of this.room.remoteParticipants.values()) {
       const other = players[p.identity];
@@ -182,7 +261,7 @@ class MediaManager {
             : Math.max(0, 1 - (d - FULL_VOLUME_DIST) / (PROXIMITY_RADIUS - FULL_VOLUME_DIST + 1));
       }
       for (const pub of p.audioTrackPublications.values()) {
-        (pub.track as RemoteAudioTrack | undefined)?.setVolume(volume);
+        (pub.track as RemoteAudioTrack | undefined)?.setVolume(volume * master);
       }
     }
   }
